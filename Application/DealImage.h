@@ -22,8 +22,18 @@ public:
 	void ResetImage();
 	void SaveImage();
 	void SharpenImage();
+	void ContrastImage();
+	void BrightnessImage();
+	void FilterImage();
+	void SaturationImage();
+	bool eventFilter(QObject *watched, QEvent *event);
 private:
-	float imageScale;
+	float imageScale;//图像缩放
+	float sharpenThresh;//图像锐化
+	float contrastThresh;//图像对比度
+	float brightnessThresh;//图像亮度
+	float saturationThresh;//图像饱和度
+	int   filterSize;//平滑滤波
 	Ui::ImageWindow ui;
 	QString imgPath;
 	QImage orginImg;

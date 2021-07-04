@@ -199,7 +199,7 @@
       <string>对比度：</string>
      </property>
     </widget>
-    <widget class="QSlider" name="horizontalSlider_3">
+    <widget class="QSlider" name="contrast">
      <property name="geometry">
       <rect>
        <x>820</x>
@@ -210,6 +210,9 @@
      </property>
      <property name="maximum">
       <number>200</number>
+     </property>
+     <property name="value">
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -260,7 +263,7 @@
       <string>亮度：</string>
      </property>
     </widget>
-    <widget class="QSlider" name="horizontalSlider_4">
+    <widget class="QSlider" name="brightness">
      <property name="geometry">
       <rect>
        <x>820</x>
@@ -269,8 +272,11 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="minimum">
+      <number>-100</number>
+     </property>
      <property name="maximum">
-      <number>200</number>
+      <number>100</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -321,7 +327,7 @@
       <string>饱和度：</string>
      </property>
     </widget>
-    <widget class="QSlider" name="horizontalSlider_5">
+    <widget class="QSlider" name="saturation">
      <property name="geometry">
       <rect>
        <x>820</x>
@@ -398,7 +404,7 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QSlider" name="horizontalSlider_11">
+    <widget class="QSlider" name="filter">
      <property name="geometry">
       <rect>
        <x>820</x>
@@ -408,7 +414,7 @@
       </rect>
      </property>
      <property name="maximum">
-      <number>200</number>
+      <number>50</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -441,7 +447,7 @@
      <string>保存</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="compare">
     <property name="geometry">
      <rect>
       <x>820</x>
