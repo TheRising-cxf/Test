@@ -3,6 +3,11 @@
 #include <QMessageBox>
 #include <math.h>
 #include "opencv.hpp"
+#include "common.h"
+#include "fft2d.h"
+#include "ifft2d.h"
+#include "encode.h"
+#include "decode.h"
 using namespace std;
 using namespace cv;
 unsigned char bySaturationMap[256 * 256];
@@ -116,6 +121,29 @@ Mat BrightnessRGB(Mat image, float brightnessThresh)
 	}
 	return newImage;
 }
+
+Mat ChromaRGB(Mat& img, int  hue)
+{
+
+	Mat temp;
+	temp = img.clone();
+	
+	cvtColor(temp, temp, CV_RGBA2RGB);
+	cvtColor(temp, temp, CV_RGB2HSV);
+
+	for (int x = 0; x < temp.cols; x++)
+	{
+		for (int y = 0; y < temp.rows; y++)
+		{
+			int h = 0;
+			h = temp.at<Vec3b>(y, x)[0] + hue;
+			temp.at<Vec3b>(y, x)[0] = max(0, min(180, h));
+		}
+	}
+	cvtColor(temp, temp, CV_HSV2RGB);
+	cvtColor(temp, temp, CV_RGB2RGBA);
+	return temp;
+}
 DealImage::DealImage(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -126,10 +154,11 @@ DealImage::DealImage(QWidget *parent)
 	connect(ui.reset, &QPushButton::clicked, this, &DealImage::ResetImage);
 	connect(ui.save, &QPushButton::clicked, this, &DealImage::SaveImage);
 	connect(ui.sharpen, &QSlider::valueChanged, this, &DealImage::SharpenImage);
-	connect(ui.contrast, &QSlider::valueChanged, this, &DealImage::ContrastImage);
+	connect(ui.contrast, &QSlider::valueChanged,    this, &DealImage::ContrastImage);
 	connect(ui.brightness, &QSlider::valueChanged, this, &DealImage::BrightnessImage);
 	connect(ui.filter, &QSlider::valueChanged, this, &DealImage::FilterImage);
 	connect(ui.saturation, &QSlider::valueChanged, this, &DealImage::SaturationImage);
+	connect(ui.chroma, &QSlider::valueChanged, this, &DealImage::ChromaImage);
 	imageFlag = false;
 	leftMousePress = false;
 	imageStartPosition_x = 0;
@@ -138,7 +167,8 @@ DealImage::DealImage(QWidget *parent)
 	sharpenThresh = 0.0f;//图像锐化
 	contrastThresh = 1.0f;//图像对比度
 	brightnessThresh = 0.0f;//图像亮度
-	saturationThresh = 0.0f;//图像饱和度
+	saturationThresh = 128.0f;//图像饱和度
+	chromaThresh = 0;
 	filterSize = 1;//平滑滤波
 }
 void DealImage::closeEvent(QCloseEvent *)
@@ -177,7 +207,8 @@ void DealImage::ResetImage() {
 	sharpenThresh = 0.0f;//图像锐化
 	contrastThresh = 1.0f;//图像对比度
 	brightnessThresh = 0.0f;//图像亮度
-	saturationThresh = 0.0f;//图像饱和度
+	saturationThresh = 128.0f;//图像饱和度
+	chromaThresh = 0;
 	filterSize = 1;//平滑滤波
 	ui.resize->setValue(imageScale*100);
 	ui.sharpen->setValue(sharpenThresh);
@@ -284,8 +315,13 @@ void DealImage::ShowImage() {
 	if (brightnessThresh != 0) {
 		result = BrightnessRGB(result, brightnessThresh);
 	}
-	if (saturationThresh != 0) {
+	//调整饱和度
+	if (saturationThresh != 128) {
 		result = Img_ISP(result);
+	}
+	//调整色度
+	if (chromaThresh != 0) {
+		result = ChromaRGB(result, chromaThresh);
 	}
 	//图像平滑
 	GaussianBlur(result, result, Size(filterSize, filterSize), 0, 0);
@@ -295,8 +331,16 @@ void DealImage::ShowImage() {
 	}
 	tmp = QImage((const uchar *)result.data, result.cols, result.rows, result.step, QImage::Format_RGB32).copy();
 	tmp = tmp.copy(x, y, ui.label->width(), ui.label->height());
+	cvtColor(result, result, CV_RGBA2RGB);
+	fftPair fft = fftPair(result);
+	Mat fft_img = fft2d(&fft);
+	imshow("fft", fft_img);
 
+	Mat ifft_img = ifft2d(&fft);
+	imshow("ifft", ifft_img);
 	ui.label->setPixmap(QPixmap::fromImage(tmp));
+
+
 }
 void DealImage::translate_image() {
 	if (!imageFlag)return;
@@ -352,6 +396,14 @@ void DealImage::SaturationImage()
 	int pos = ui.saturation->value();
 	saturationThresh = pos;
 	CreateSaturationMap(saturationThresh);
+	ShowImage();
+}
+ 
+void DealImage::ChromaImage()
+{
+	if (!imageFlag)return;
+	int pos = ui.chroma->value();
+	chromaThresh = pos;
 	ShowImage();
 }
 

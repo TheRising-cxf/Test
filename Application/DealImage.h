@@ -26,6 +26,7 @@ public:
 	void BrightnessImage();
 	void FilterImage();
 	void SaturationImage();
+	void ChromaImage();
 	bool eventFilter(QObject *watched, QEvent *event);
 private:
 	float imageScale;//图像缩放
@@ -33,6 +34,7 @@ private:
 	float contrastThresh;//图像对比度
 	float brightnessThresh;//图像亮度
 	float saturationThresh;//图像饱和度
+	int   chromaThresh;
 	int   filterSize;//平滑滤波
 	Ui::ImageWindow ui;
 	QString imgPath;

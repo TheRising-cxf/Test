@@ -31,7 +31,7 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>5.12.2_msvc2017_64</QtInstall>
+    <QtInstall>5.13.1_msvc2017_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
@@ -60,10 +60,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Qt\Qt5.12.2\5.12.2\msvc2017_64\include\QtCharts;C:\Qt\Qt5.12.2\5.12.2\msvc2017_64\include\QtMultimedia;..\opencv\include;..\opencv\include\opencv;..\opencv\include\opencv2;..\ffmpeg-4.4-full_build-shared\include;..\SDL2-2.0.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\QT\5.13.1\msvc2017_64\include\QtCharts;D:\QT\5.13.1\msvc2017_64\include\QtMultimedia;..\opencv\include;..\opencv\include\opencv;..\opencv\include\opencv2;..\ffmpeg-4.4-full_build-shared\include;..\SDL2-2.0.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\opencv\lib;..\ffmpeg-4.4-full_build-shared\lib\;..\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\opencv\lib;..\ffmpeg-4.4-full_build-shared\lib\;..\SDL2-2.0.14\lib\x64;D:\QT\5.13.1\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Qt5Chartsd.lib;Qt5Multimediad.lib;opencv_world348d.lib;..\ffmpeg-4.4-full_build-shared\lib\*.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -110,9 +110,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="common.cpp" />
     <ClCompile Include="DealConnect.cpp" />
+    <ClCompile Include="decode.cpp" />
+    <ClCompile Include="encode.cpp" />
     <ClCompile Include="FFmpegUse.cpp" />
+    <ClCompile Include="fft.cpp" />
+    <ClCompile Include="fft2d.cpp" />
     <ClCompile Include="FrameQueue.cpp" />
+    <ClCompile Include="ifft2d.cpp" />
     <ClCompile Include="Media.cpp" />
     <ClCompile Include="PacketQueue.cpp" />
     <ClCompile Include="qmydisplaydevice.cpp" />
@@ -149,7 +155,12 @@
     <ClInclude Include="Audio.h" />
     <QtMoc Include="DealConnect.h" />
     <QtMoc Include="FFmpegUse.h" />
+    <ClInclude Include="common.h" />
+    <ClInclude Include="decode.h" />
+    <ClInclude Include="fft.h" />
+    <ClInclude Include="fft2d.h" />
     <ClInclude Include="FrameQueue.h" />
+    <ClInclude Include="ifft2d.h" />
     <ClInclude Include="Media.h" />
     <ClInclude Include="PacketQueue.h" />
     <ClInclude Include="Video.h" />
