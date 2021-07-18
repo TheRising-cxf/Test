@@ -4,6 +4,7 @@
 #include <ui_dealImage.h>
 #include<QWheelEvent>
 #include<QKeyEvent>
+#include "ImageProcessAlgorithom.h"
 class DealImage :
 	public QMainWindow
 {
@@ -12,6 +13,7 @@ signals:
 	void ExitWin();//新建一个信号槽
 public:
 	DealImage(QWidget *parent = Q_NULLPTR);
+	~DealImage();
 	void closeEvent(QCloseEvent *);
 	void mousePressEvent(QMouseEvent *event);
 	void mouseReleaseEvent(QMouseEvent *event);
@@ -36,6 +38,8 @@ private:
 	float saturationThresh;//图像饱和度
 	int   chromaThresh;
 	int   filterSize;//平滑滤波
+	int   widthFFT, heightFFT;
+	complex<double>* pFrequencyData;
 	Ui::ImageWindow ui;
 	QString imgPath;
 	QImage orginImg;
@@ -51,5 +55,7 @@ private:
 private slots:
 	void LoadImage();
 	void SetLineEditValue(int value);
+	void on_actionFFT_triggered();
+	void on_actionIFFT_triggered();
 };
 

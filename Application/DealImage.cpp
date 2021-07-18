@@ -3,11 +3,7 @@
 #include <QMessageBox>
 #include <math.h>
 #include "opencv.hpp"
-#include "common.h"
-#include "fft2d.h"
-#include "ifft2d.h"
-#include "encode.h"
-#include "decode.h"
+
 using namespace std;
 using namespace cv;
 unsigned char bySaturationMap[256 * 256];
@@ -170,6 +166,15 @@ DealImage::DealImage(QWidget *parent)
 	saturationThresh = 128.0f;//图像饱和度
 	chromaThresh = 0;
 	filterSize = 1;//平滑滤波
+	pFrequencyData = NULL;
+}
+DealImage::~DealImage()
+{
+	if (pFrequencyData != NULL)
+	{
+		delete[]pFrequencyData;
+		pFrequencyData = NULL;
+	}
 }
 void DealImage::closeEvent(QCloseEvent *)
 {
@@ -229,6 +234,30 @@ void DealImage::SetLineEditValue(int value)
 		QString str = QString("放大倍数: %1\%").arg(pos);
 		ui.label_2->setText(str);
 		ShowImage();
+	}
+}
+void DealImage::on_actionFFT_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	if (pFrequencyData != NULL)
+	{
+		delete []pFrequencyData;
+		pFrequencyData = NULL;
+	}
+	pFrequencyData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	imshow("fft", result);
+}
+void DealImage::on_actionIFFT_triggered()
+{
+	if (!imageFlag)return;
+	if (pFrequencyData != NULL) {
+		Mat IFFTImage = Mat::zeros(Size(curImage.width(),curImage.height()), CV_8UC4);
+		ImageIFFT((unsigned char*)IFFTImage.datastart, pFrequencyData, widthFFT, heightFFT, IFFTImage.cols, IFFTImage.rows);
+		imshow("ifft", IFFTImage);
+		delete []pFrequencyData;
+		pFrequencyData = NULL;
 	}
 }
 void DealImage::mousePressEvent(QMouseEvent *event) // 鼠标按下事件
@@ -300,7 +329,7 @@ void DealImage::wheelEvent(QWheelEvent *event)    // 滚轮事件
 }
 void DealImage::ShowImage() {
 	//调整大小
-	QImage tmp = curImage.copy();
+	QImage tmp = orginImg.copy();
 	Mat result;
 	tmp = tmp.scaled(tmp.width()*imageScale, tmp.height()*imageScale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 	int x = -(ui.label->width() / 2 - tmp.width() / 2) + imageStartPosition_x;
@@ -330,17 +359,16 @@ void DealImage::ShowImage() {
 		result = SharpLaplacianRGB(result, sharpenThresh);
 	}
 	tmp = QImage((const uchar *)result.data, result.cols, result.rows, result.step, QImage::Format_RGB32).copy();
+	curImage = tmp.copy();
 	tmp = tmp.copy(x, y, ui.label->width(), ui.label->height());
-	cvtColor(result, result, CV_RGBA2RGB);
-	fftPair fft = fftPair(result);
-	Mat fft_img = fft2d(&fft);
-	imshow("fft", fft_img);
+	//cvtColor(result, result, CV_RGBA2RGB);
+	//fftPair fft = fftPair(result);
+	//Mat fft_img = fft2d(&fft);
+	//imshow("fft", fft_img);
 
-	Mat ifft_img = ifft2d(&fft);
-	imshow("ifft", ifft_img);
+	//Mat ifft_img = ifft2d(&fft);
+	//imshow("ifft", ifft_img);
 	ui.label->setPixmap(QPixmap::fromImage(tmp));
-
-
 }
 void DealImage::translate_image() {
 	if (!imageFlag)return;

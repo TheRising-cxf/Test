@@ -110,15 +110,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
-    <ClCompile Include="common.cpp" />
     <ClCompile Include="DealConnect.cpp" />
-    <ClCompile Include="decode.cpp" />
-    <ClCompile Include="encode.cpp" />
     <ClCompile Include="FFmpegUse.cpp" />
-    <ClCompile Include="fft.cpp" />
-    <ClCompile Include="fft2d.cpp" />
     <ClCompile Include="FrameQueue.cpp" />
-    <ClCompile Include="ifft2d.cpp" />
+    <ClCompile Include="ImageProcessAlgorithom.cpp" />
     <ClCompile Include="Media.cpp" />
     <ClCompile Include="PacketQueue.cpp" />
     <ClCompile Include="qmydisplaydevice.cpp" />
@@ -155,13 +150,8 @@
     <ClInclude Include="Audio.h" />
     <QtMoc Include="DealConnect.h" />
     <QtMoc Include="FFmpegUse.h" />
-    <ClInclude Include="common.h" />
-    <ClInclude Include="decode.h" />
-    <ClInclude Include="fft.h" />
-    <ClInclude Include="fft2d.h" />
     <ClInclude Include="FrameQueue.h" />
-    <ClInclude Include="ifft2d.h" />
-    <ClInclude Include="Media.h" />
+    <ClInclude Include="ImageProcessAlgorithom.h" />
     <ClInclude Include="PacketQueue.h" />
     <ClInclude Include="Video.h" />
     <ClInclude Include="VideoDisplay.h" />

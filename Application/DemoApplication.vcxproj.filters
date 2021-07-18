@@ -82,22 +82,7 @@
     <ClCompile Include="FFmpegUse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="decode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="encode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fft.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="fft2d.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ifft2d.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common.cpp">
+    <ClCompile Include="ImageProcessAlgorithom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -154,9 +139,6 @@
     <ClInclude Include="FrameQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Media.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PacketQueue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -166,19 +148,7 @@
     <ClInclude Include="VideoDisplay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="decode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fft.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="fft2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ifft2d.h">
+    <ClInclude Include="ImageProcessAlgorithom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
