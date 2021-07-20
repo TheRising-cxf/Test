@@ -173,7 +173,8 @@ void FFT_2D(complex<double> * pSpaceData, complex<double> * pFrequencyData, int 
 	{
 		for (x = 0; x < nWidthFFT; x++)
 		{
-			pSpaceData[nHeightFFT * x + y] = pFrequencyData[nWidthFFT * y + x];
+			//pSpaceData[nHeightFFT * x + y] = pFrequencyData[nWidthFFT * y + x];
+			pSpaceData[nWidthFFT * y + x] = pFrequencyData[nHeightFFT * x + y];
 		}
 	}
 
@@ -286,7 +287,8 @@ void IFFT_2D(complex<double> *pFrequencyData, int nWidthFFT, int nHeightFFT, com
 	for (y = 0; y < nHeightFFT; ++y)
 	{
 		for (x = 0; x < nWidthFFT; ++x)
-			pFrequencyData[nHeightFFT * x + y] = pSpaceData[nWidthFFT * y + x];
+			pFrequencyData[nWidthFFT * y + x] = pSpaceData[nHeightFFT * x + y];
+			//pFrequencyData[nHeightFFT * x + y] = pSpaceData[nWidthFFT * y + x];
 	}
 
 	// 5　给空间域赋值
@@ -338,9 +340,9 @@ complex<double>* ImageFFT(unsigned char* imageData, int m_nPicWidth, int m_nPicH
 		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
 		{
 			//空域乘以pow(-1, x+y)，频谱移至中心
-			pSpaceDataB[y*nWidthFFT + x] = complex<double>(imageData[pixel] , 0);
-			pSpaceDataG[y*nWidthFFT + x] = complex<double>(imageData[pixel + 1] , 0);
-			pSpaceDataR[y*nWidthFFT + x] = complex<double>(imageData[pixel + 2] , 0);
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(imageData[pixel] * pow(-1, x + y), 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(imageData[pixel + 1] * pow(-1, x + y), 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(imageData[pixel + 2] * pow(-1, x + y), 0);
 		}
 	}
 
