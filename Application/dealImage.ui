@@ -672,8 +672,31 @@
     <property name="title">
      <string>频域处理</string>
     </property>
+    <widget class="QMenu" name="menu_10">
+     <property name="title">
+      <string>低通滤波</string>
+     </property>
+     <addaction name="action_low_1"/>
+     <addaction name="action_low_2"/>
+     <addaction name="action_low_3"/>
+     <addaction name="action_low_4"/>
+     <addaction name="action_low_5"/>
+    </widget>
+    <widget class="QMenu" name="menu_11">
+     <property name="title">
+      <string>高通滤波</string>
+     </property>
+     <addaction name="action_high_1"/>
+     <addaction name="action_high_2"/>
+     <addaction name="action_high_3"/>
+     <addaction name="action_high_4"/>
+     <addaction name="action_high_5"/>
+     <addaction name="action_high_6"/>
+    </widget>
     <addaction name="actionFFT"/>
     <addaction name="actionIFFT"/>
+    <addaction name="menu_10"/>
+    <addaction name="menu_11"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_E"/>
@@ -716,6 +739,61 @@
   <action name="actionFDCT">
    <property name="text">
     <string>FDCT</string>
+   </property>
+  </action>
+  <action name="action_low_1">
+   <property name="text">
+    <string>理想低通滤波</string>
+   </property>
+  </action>
+  <action name="action_low_2">
+   <property name="text">
+    <string>巴特沃斯低通滤波</string>
+   </property>
+  </action>
+  <action name="action_low_3">
+   <property name="text">
+    <string>指数低通滤波</string>
+   </property>
+  </action>
+  <action name="action_low_4">
+   <property name="text">
+    <string>梯形低通滤波</string>
+   </property>
+  </action>
+  <action name="action_low_5">
+   <property name="text">
+    <string>高斯低通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_1">
+   <property name="text">
+    <string>理想高通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_2">
+   <property name="text">
+    <string>巴沃特斯高通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_3">
+   <property name="text">
+    <string>指数高通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_4">
+   <property name="text">
+    <string>梯形高通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_5">
+   <property name="text">
+    <string>高斯高通滤波</string>
+   </property>
+  </action>
+  <action name="action_high_6">
+   <property name="text">
+    <string>高频增强滤波</string>
    </property>
   </action>
  </widget>

@@ -57,5 +57,16 @@ private slots:
 	void SetLineEditValue(int value);
 	void on_actionFFT_triggered();
 	void on_actionIFFT_triggered();
+	void on_action_low_1_triggered();
+	void on_action_low_2_triggered();
+	void on_action_low_3_triggered();
+	void on_action_low_4_triggered();
+	void on_action_low_5_triggered();
+	void on_action_high_1_triggered();
+	void on_action_high_2_triggered();
+	void on_action_high_3_triggered();
+	void on_action_high_4_triggered();
+	void on_action_high_5_triggered();
+	void on_action_high_6_triggered();
 };
 

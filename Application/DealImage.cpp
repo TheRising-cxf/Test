@@ -260,6 +260,149 @@ void DealImage::on_actionIFFT_triggered()
 		pFrequencyData = NULL;
 	}
 }
+void DealImage::on_action_low_1_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat ILPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageILPF((unsigned char*)ILPFImage.datastart, tmpData, widthFFT, heightFFT, ILPFImage.cols, ILPFImage.rows,120);
+	imshow("ilpf", ILPFImage);
+	delete []tmpData;
+}
+void DealImage::on_action_low_2_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat BLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageBLPF((unsigned char*)BLPFImage.datastart, tmpData, widthFFT, heightFFT, BLPFImage.cols, BLPFImage.rows, 100,3);
+	imshow("blpf", BLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_low_3_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat ELPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageELPF((unsigned char*)ELPFImage.datastart, tmpData, widthFFT, heightFFT, ELPFImage.cols, ELPFImage.rows, 10, 3);
+	imshow("elpf", ELPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_low_4_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat TLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageTLPF((unsigned char*)TLPFImage.datastart, tmpData, widthFFT, heightFFT, TLPFImage.cols, TLPFImage.rows, 100, 150);
+	imshow("tlpf", TLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_low_5_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat GLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageGLPF((unsigned char*)GLPFImage.datastart, tmpData, widthFFT, heightFFT, GLPFImage.cols, GLPFImage.rows, 10);
+	imshow("glpf", GLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_1_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat ILPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageILPF((unsigned char*)ILPFImage.datastart, tmpData, widthFFT, heightFFT, ILPFImage.cols, ILPFImage.rows, 10,true);
+	imshow("ilpfh", ILPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_2_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat BLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageBLPF((unsigned char*)BLPFImage.datastart, tmpData, widthFFT, heightFFT, BLPFImage.cols, BLPFImage.rows, 100, 3,true);
+	imshow("blpfh", BLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_3_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat ELPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageELPF((unsigned char*)ELPFImage.datastart, tmpData, widthFFT, heightFFT, ELPFImage.cols, ELPFImage.rows, 10, 3,true);
+	imshow("elpfh", ELPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_4_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat TLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageTLPF((unsigned char*)TLPFImage.datastart, tmpData, widthFFT, heightFFT, TLPFImage.cols, TLPFImage.rows, 100, 150,true);
+	imshow("tlpfh", TLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_5_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat GLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageGLPF((unsigned char*)GLPFImage.datastart, tmpData, widthFFT, heightFFT, GLPFImage.cols, GLPFImage.rows, 10,true);
+	imshow("glpfh", GLPFImage);
+	delete[]tmpData;
+}
+void DealImage::on_action_high_6_triggered()
+{
+	if (!imageFlag)return;
+
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	complex<double>* tmpData;
+	tmpData = ImageFFT((unsigned char*)result.datastart, result.cols, result.rows, widthFFT, heightFFT);
+	Mat GLPFImage = Mat::zeros(Size(curImage.width(), curImage.height()), CV_8UC4);
+	ImageGLPFP((unsigned char*)GLPFImage.datastart, tmpData, widthFFT, heightFFT, GLPFImage.cols, GLPFImage.rows, 10, 1 ,0.5);
+	imshow("glpfhp", GLPFImage);
+	delete[]tmpData;
+}
 void DealImage::mousePressEvent(QMouseEvent *event) // 鼠标按下事件
 {
 	int x = event->pos().x() - ui.groupBox->x();

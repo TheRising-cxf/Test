@@ -440,3 +440,427 @@ void ImageIFFT(unsigned char *imageData, complex<double>* pFrequencyData, int nW
 	delete[]pSpaceDataG;
 	delete[]pSpaceDataR;
 }
+void ImageILPF(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight,int thresh, bool useHigh) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			int tmp = sqrt((y - nHeightFFT / 2)*(y - nHeightFFT / 2) + (x - nWidthFFT / 2)*(x - nWidthFFT / 2));
+			float h = 1;
+			if (tmp > thresh) {
+				h = 0;
+			}
+			else {
+				h = 1;
+			}
+			if (useHigh)h = 1 - h;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
+void ImageBLPF(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight, float sigma, int n, bool useHigh) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			float d = sqrt(pow(float(x - nWidthFFT / 2), 2) + pow(float(y - nHeightFFT / 2), 2));//分子,计算pow必须为float型
+			float h = 1.0f / (1.0f + pow(d / sigma, 2 * n));
+			if (useHigh)h = 1 - h;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
+void ImageELPF(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight, float sigma, int n, bool useHigh) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			float d = sqrt(pow(float(x - nWidthFFT / 2), 2) + pow(float(y - nHeightFFT / 2), 2));//分子,计算pow必须为float型
+			float h = exp(-pow(d / sigma,n));
+			if (useHigh)h = 1 - h;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
+void ImageTLPF(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight, int lowThresh, int highThresh, bool useHigh) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			float d = sqrt(pow(float(x - nWidthFFT / 2), 2) + pow(float(y - nHeightFFT / 2), 2));//分子,计算pow必须为float型
+			float h = 1;
+			if (d < highThresh) {
+				if(d>lowThresh) {
+					h = (d - highThresh) / (lowThresh - highThresh);
+				}
+			}
+			else {
+				h = 0;
+			}
+			if (useHigh)h = 1 - h;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
+void ImageGLPF(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight, int thresh, bool useHigh) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			float d = sqrt(pow(float(x - nWidthFFT / 2), 2) + pow(float(y - nHeightFFT / 2), 2));//分子,计算pow必须为float型
+			float h = exp(-0.5*(d / thresh)*(d / thresh));
+			if (useHigh)h = 1 - h;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
+void ImageGLPFP(unsigned char *imageData, complex<double>* pFrequencyData, int nWidthFFT, int nHeightFFT, int m_nPicWidth, int m_nPicHeight, int thresh, float k,float c) {
+
+
+	int x = 0;
+	int y = 0;
+	int pixel = 0;
+	//指向空域数据的指针
+	complex<double>* pSpaceDataB, *pSpaceDataG, *pSpaceDataR;
+	//分配存储空间
+	pSpaceDataB = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataG = new complex<double>[nWidthFFT * nHeightFFT];
+	pSpaceDataR = new complex<double>[nWidthFFT * nHeightFFT];
+
+	complex<double> *pFrequencyData1, *pFrequencyData2, *pFrequencyData3;
+	pFrequencyData1 = pFrequencyData;
+	pFrequencyData2 = pFrequencyData + nWidthFFT * nHeightFFT;
+	pFrequencyData3 = pFrequencyData2 + nWidthFFT * nHeightFFT;
+	/*初始化空间域数据*/
+	for (y = 0; y < nHeightFFT; ++y)
+	{
+		for (x = 0; x < nWidthFFT; ++x)
+		{
+			pSpaceDataB[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataG[y*nWidthFFT + x] = complex<double>(0, 0);
+			pSpaceDataR[y*nWidthFFT + x] = complex<double>(0, 0);
+			float d = sqrt(pow(float(x - nWidthFFT / 2), 2) + pow(float(y - nHeightFFT / 2), 2));//分子,计算pow必须为float型
+			float h = exp(-0.5*(d / thresh)*(d / thresh));
+			h = 1 - h;
+			h = h * k + c;
+			pFrequencyData1[y*nWidthFFT + x] *= h;
+			pFrequencyData2[y*nWidthFFT + x] *= h;
+			pFrequencyData3[y*nWidthFFT + x] *= h;
+		}
+	}
+
+	//快速傅立叶变换
+	IFFT_2D(pFrequencyData1, nWidthFFT, nHeightFFT, pSpaceDataB);
+	IFFT_2D(pFrequencyData2, nWidthFFT, nHeightFFT, pSpaceDataG);
+	IFFT_2D(pFrequencyData3, nWidthFFT, nHeightFFT, pSpaceDataR);
+
+	pixel = 0;
+	double dTemp;
+	for (y = 0; y < m_nPicHeight; ++y)
+	{
+		for (x = 0; x < m_nPicWidth; ++x, pixel += 4)
+		{
+			dTemp = pSpaceDataB[y * nWidthFFT + x].real() * pSpaceDataB[y * nWidthFFT + x].real() +
+				pSpaceDataB[y * nWidthFFT + x].imag() * pSpaceDataB[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataG[y * nWidthFFT + x].real() * pSpaceDataG[y * nWidthFFT + x].real() +
+				pSpaceDataG[y * nWidthFFT + x].imag() * pSpaceDataG[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 1] = (unsigned char)dTemp;
+
+			dTemp = pSpaceDataR[y * nWidthFFT + x].real() * pSpaceDataR[y * nWidthFFT + x].real() +
+				pSpaceDataR[y * nWidthFFT + x].imag() * pSpaceDataR[y * nWidthFFT + x].imag();
+			dTemp = sqrt(dTemp);
+			if (dTemp > 255)dTemp = 255;
+			imageData[pixel + 2] = (unsigned char)dTemp;
+		}
+	}
+	delete[]pSpaceDataB;
+	delete[]pSpaceDataG;
+	delete[]pSpaceDataR;
+}
