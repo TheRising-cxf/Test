@@ -1338,3 +1338,37 @@ void ImageLog(unsigned char * imageData, int width, int height, float threash)
 	delete[] newImage;
 	newImage = NULL;
 }
+
+void ImageExpT(unsigned char * imageData,int width,int height, float contrastThresh)
+{
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int index = (y * width + x) * 4;
+			imageData[index] = pow(imageData[index] / 255.0f, contrastThresh) * 255.0f;
+			imageData[index + 1] = pow(imageData[index + 1] / 255.0f, contrastThresh) * 255.0f;
+			imageData[index + 2] = pow(imageData[index + 2] / 255.0f, contrastThresh) * 255.0f;
+		}
+	}
+}
+void ImageLogT(unsigned char * imageData, int width, int height, float contrastThresh)
+{
+	for (int x = 0; x < width; x++)
+	{
+		for (int y = 0; y < height; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int index = (y * width + x) * 4;
+			float c = 255.0f / log(1 + 255);
+			imageData[index] = c * log(imageData[index] + 1.0f);
+			imageData[index + 1] = c * log(imageData[index + 1] + 1.0f);
+			imageData[index + 2] = c * log(imageData[index + 2] + 1.0f);
+		}
+	}
+}

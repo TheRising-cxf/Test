@@ -699,19 +699,14 @@
     </property>
     <widget class="QMenu" name="menua">
      <property name="title">
-      <string>线性滤波</string>
+      <string>图像平滑</string>
      </property>
      <addaction name="actiona1"/>
      <addaction name="actiona2"/>
      <addaction name="actiona3"/>
      <addaction name="actiona4"/>
-    </widget>
-    <widget class="QMenu" name="menub">
-     <property name="title">
-      <string>非线性滤波</string>
-     </property>
-     <addaction name="actiona1_2"/>
-     <addaction name="actiona2_2"/>
+     <addaction name="actiona1_3"/>
+     <addaction name="actionb1_2"/>
     </widget>
     <widget class="QMenu" name="menud">
      <property name="title">
@@ -742,12 +737,10 @@
      <property name="title">
       <string>灰度变换</string>
      </property>
-     <addaction name="actionb1"/>
-     <addaction name="actionn2"/>
-     <addaction name="actionn3"/>
+     <addaction name="action_logT"/>
+     <addaction name="action_expT"/>
     </widget>
     <addaction name="menua"/>
-    <addaction name="menub"/>
     <addaction name="menud"/>
     <addaction name="menua_2"/>
     <addaction name="menub_2"/>
@@ -860,16 +853,6 @@
     <string>Wiener滤波</string>
    </property>
   </action>
-  <action name="actiona1_2">
-   <property name="text">
-    <string>中值滤波</string>
-   </property>
-  </action>
-  <action name="actiona2_2">
-   <property name="text">
-    <string>序统计滤波</string>
-   </property>
-  </action>
   <action name="action_grad">
    <property name="text">
     <string>梯度法</string>
@@ -900,21 +883,6 @@
     <string>直方图均衡化</string>
    </property>
   </action>
-  <action name="actionb1">
-   <property name="text">
-    <string>比例线性变换</string>
-   </property>
-  </action>
-  <action name="actionn2">
-   <property name="text">
-    <string>分段线性变换</string>
-   </property>
-  </action>
-  <action name="actionn3">
-   <property name="text">
-    <string>非线性变换</string>
-   </property>
-  </action>
   <action name="action_hisSML">
    <property name="text">
     <string>单映射</string>
@@ -928,6 +896,26 @@
   <action name="action_lpls">
    <property name="text">
     <string>拉普拉斯</string>
+   </property>
+  </action>
+  <action name="actiona1_3">
+   <property name="text">
+    <string>中值滤波</string>
+   </property>
+  </action>
+  <action name="actionb1_2">
+   <property name="text">
+    <string>序统计滤波</string>
+   </property>
+  </action>
+  <action name="action_logT">
+   <property name="text">
+    <string>对数变换</string>
+   </property>
+  </action>
+  <action name="action_expT">
+   <property name="text">
+    <string>幂次变换</string>
    </property>
   </action>
  </widget>

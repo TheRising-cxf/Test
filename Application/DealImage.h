@@ -77,5 +77,7 @@ private slots:
 	void on_action_sobel_triggered();
 	void on_action_qualc_triggered();
 	void on_action_log_triggered();
+	void on_action_logT_triggered();
+	void on_action_expT_triggered();
 };
 

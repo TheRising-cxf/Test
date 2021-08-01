@@ -25,3 +25,5 @@ void ImagePrewitt(unsigned char * imageData, int width, int height, float ratio,
 void ImageSobel(unsigned char * imageData, int width, int height, float ratio, float threash, int flag);
 void ImageQualc(unsigned char * imageData, int width, int height, float threash);
 void ImageLog(unsigned char * imageData, int width, int height, float threash);
+void ImageExpT(unsigned char * imageData, int width, int height, float contrastThresh);
+void ImageLogT(unsigned char * imageData, int width, int height, float contrastThresh);

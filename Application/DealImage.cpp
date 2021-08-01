@@ -486,6 +486,22 @@ void DealImage::on_action_log_triggered()
 	ImageLog((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.15);
 	imshow("log", result);
 }
+void DealImage::on_action_logT_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageLogT((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.15);
+	imshow("logT", result);
+}
+void DealImage::on_action_expT_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageExpT((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.15);
+	imshow("expT", result);
+}
 void DealImage::mousePressEvent(QMouseEvent *event) // 鼠标按下事件
 {
 	int x = event->pos().x() - ui.groupBox->x();
