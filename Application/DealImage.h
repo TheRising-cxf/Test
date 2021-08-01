@@ -68,5 +68,14 @@ private slots:
 	void on_action_high_4_triggered();
 	void on_action_high_5_triggered();
 	void on_action_high_6_triggered();
+	void on_action_hisEqu_triggered();
+	void on_action_hisSML_triggered();
+	void on_action_hisGML_triggered();
+	void on_action_lpls_triggered();
+	void on_action_grad_triggered();
+	void on_action_prewitt_triggered();
+	void on_action_sobel_triggered();
+	void on_action_qualc_triggered();
+	void on_action_log_triggered();
 };
 

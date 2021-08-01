@@ -1,4 +1,5 @@
 ﻿#include "ImageProcessAlgorithom.h"
+#include <algorithm>
 /*************************************************************************
  *
  * \函数名称：
@@ -863,4 +864,477 @@ void ImageGLPFP(unsigned char *imageData, complex<double>* pFrequencyData, int n
 	delete[]pSpaceDataB;
 	delete[]pSpaceDataG;
 	delete[]pSpaceDataR;
+}
+
+void ImageHisEqu(unsigned char * imageData, int width, int height)
+{
+	int gray[3][256] = { 0 };  //记录每个灰度级别下的像素个数
+	double gray_prob[3][256] = { 0 };  //记录灰度分布密度
+	double gray_distribution[3][256] = { 0 };  //记录累计密度
+	int gray_equal[3][256] = { 0 };  //均衡化后的灰度值
+	int gray_sum = width*height;  //像素总数
+	GetHisInfo(imageData, width, height, gray, gray_prob, gray_distribution);
+	//重新计算均衡化后的灰度值，四舍五入。参考公式：(N-1)*T+0.5
+	for (int i = 0; i < 256; i++)
+	{
+		for (int k = 0; k < 3; k++) {
+			gray_equal[k][i] = (unsigned char)(255 * gray_distribution[k][i] + 0.5);
+		}
+	}
+	//直方图均衡化,更新原图每个点的像素值
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			for (int k = 0; k < 3; k++) {
+				int index = (i * width + j)*4+k;
+				imageData[index] = gray_equal[k][imageData[index]];
+			}
+		}
+	}
+}
+
+void ImageHisSML(unsigned char * imageData, int width, int height, double zhist[][256])
+{
+	int gray[3][256] = { 0 };  //记录每个灰度级别下的像素个数
+	double gray_prob[3][256] = { 0 };  //记录灰度分布密度
+	double gray_distribution[3][256] = { 0 };  //记录累计密度
+	int gray_equal[3][256] = { 0 };  //均衡化后的灰度值
+	int gray_sum = width * height;  //像素总数
+	GetHisInfo(imageData, width, height, gray, gray_prob, gray_distribution);
+	int G[3][256] = { 0 };
+	float zsumhist[3][256] = { 0.0 };
+	zsumhist[0][0] = zhist[0][0];
+	zsumhist[1][0] = zhist[1][0];
+	zsumhist[2][0] = zhist[2][0];
+	for (int i = 0; i < 256; i++) {
+		for (int k = 0; k < 3; k++) {
+			zsumhist[k][i] =  zhist[k][i];
+		}
+	}
+	for (int k = 0; k < 3; k++) {
+		for (int i = 0; i < 256; i++) {
+			if (gray_distribution[k][i] < 0.00000001)continue;
+			float minD = 2;
+			for (int j = 0; j < 256; j++) {
+				if (zsumhist[k][j] < 0.00000001)continue;
+				float tmp = zsumhist[k][j] - gray_distribution[k][i];
+				if (tmp > 0) {
+					if (tmp < minD) {
+						G[k][i] = j;
+						break;
+					}
+				}
+				else {
+					if (fabs(tmp) < minD) {
+						G[k][i] = j;
+						minD = fabs(tmp);
+					}
+				}
+			}
+		}
+	}
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			for (int k = 0; k < 3; k++) {
+				int index = (i * width + j) * 4 + k;
+				imageData[index] = G[k][imageData[index]];
+			}
+		}
+	}
+
+}
+
+void ImageHisGML(unsigned char * imageData, int width, int height, double zhist[][256])
+{
+	int gray[3][256] = { 0 };  //记录每个灰度级别下的像素个数
+	double gray_prob[3][256] = { 0 };  //记录灰度分布密度
+	double gray_distribution[3][256] = { 0 };  //记录累计密度
+	int gray_equal[3][256] = { 0 };  //均衡化后的灰度值
+	int gray_sum = width * height;  //像素总数
+	GetHisInfo(imageData, width, height, gray, gray_prob, gray_distribution);
+	int G[3][256] = { 0 };
+	float zsumhist[3][256] = { 0.0 };
+	zsumhist[0][0] = zhist[0][0];
+	zsumhist[1][0] = zhist[1][0];
+	zsumhist[2][0] = zhist[2][0];
+	for (int i = 0; i < 256; i++) {
+		for (int k = 0; k < 3; k++) {
+			zsumhist[k][i] = zhist[k][i];
+		}
+	}
+	for (int k = 0; k < 3; k++) {
+		int last = 0;
+		for (int i = 0; i < 256; i++) {
+			if (zsumhist[k][i] < 0.00000001)continue;
+			float minD = 2;
+			int id = 0;
+			for (int j = 0; j < 256; j++) {
+				if (gray_distribution[k][j] < 0.00000001)continue;
+				float tmp = fabs(gray_distribution[k][j] - zsumhist[k][i]);
+				if (tmp < minD) {
+					minD = tmp;
+					id = j;
+				}
+			}
+			for (int m = last; m <= id; m++) {
+				G[k][m] = i;
+			}
+			last = id+1;
+		}
+	}
+	for (int i = 0; i < height; i++)
+	{
+		for (int j = 0; j < width; j++)
+		{
+			for (int k = 0; k < 3; k++) {
+				int index = (i * width + j) * 4 + k;
+				imageData[index] = G[k][imageData[index]];
+			}
+		}
+	}
+}
+
+void GetHisInfo(unsigned char * imageData, int width, int height, int gray[][256], double gray_prob[][256], double gray_distribution[][256])
+{
+	int gray_sum = width * height;  //像素总数
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			for (int k = 0; k < 3; k++) {
+				gray[k][imageData[(i*width + j) * 4 + k]]++;
+			}
+		}
+	}
+	for (int i = 0; i < 256; i++) {
+		for (int k = 0; k < 3; k++) {
+			gray_prob[k][i] = (double)gray[k][i] / gray_sum;
+		}
+	}
+	//计算累计密度
+	gray_distribution[0][0] = gray_prob[0][0];
+	gray_distribution[1][0] = gray_prob[1][0];
+	gray_distribution[2][0] = gray_prob[2][0];
+	for (int i = 1; i < 256; i++)
+	{
+		for (int k = 0; k < 3; k++) {
+			gray_distribution[k][i] = gray_distribution[k][i - 1] + gray_prob[k][i];
+		}
+	}
+}
+
+void SharpLaplacian(unsigned char * imageData, int width, int height, float threash)
+{
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	int kernel[3][3] = {
+	{-1,-1,-1},
+	{-1,8,-1},
+	{-1,-1,-1} };
+	int sizeKernel = 3;
+	int sumKernel = 3;
+	for (int x = sizeKernel / 2; x < width - sizeKernel / 2; x++)
+	{
+		for (int y = sizeKernel / 2; y < height- sizeKernel / 2; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			for (int i = -sizeKernel / 2; i <= sizeKernel / 2; i++)
+			{
+				for (int j = -sizeKernel / 2; j <= sizeKernel / 2; j++)
+				{
+					int index = ((y + i)*width + x + j) * 4;
+					r += newImage[index] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					g += newImage[index+1] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					b += newImage[index+2] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+				}
+			}
+			int index = (y*width + x) * 4;
+			r = r * threash + newImage[index];
+			g = g * threash + newImage[index + 1];
+			b = b * threash + newImage[index + 2];
+			imageData[index]  = max(0, min(255, r));
+			imageData[index + 1] = max(0, min(255, g));
+			imageData[index + 2] = max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
+}
+void ImageGrad(unsigned char * imageData, int width, int height, float ratio,float threash, int flag) {
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	for (int x = 0; x < width - 1; x++)
+	{
+		for (int y = 0; y < height - 1; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int index0 = (y*width + x) * 4;
+			int index1 = (y*width + x + 1) * 4;
+			int index2 = ((y+1)*width + x) * 4;
+			int rx = newImage[index0] - newImage[index1];
+			int ry = newImage[index0] - newImage[index2];
+			int gx = newImage[index0+1] - newImage[index1+1];
+			int gy = newImage[index0+1] - newImage[index2+1];
+			int bx = newImage[index0+2] - newImage[index1+2];
+			int by = newImage[index0+2] - newImage[index2+2];
+			if (flag == 0) {
+
+				r = sqrt(rx * rx + ry * ry);
+				g = sqrt(gx * gx + gy * gy);
+				b = sqrt(bx * bx + by * by);
+			}
+			else if(flag==1){
+				r = abs(newImage[index0] - newImage[index1])+ abs(newImage[index0] - newImage[index2]);
+				g = abs((newImage[index0 + 1] - newImage[index1]) + abs(newImage[index0 + 1] - newImage[index2 + 1]));
+				b = abs((newImage[index0 + 2] - newImage[index1]) + abs(newImage[index0 + 2] - newImage[index2 + 2]));
+			}
+			else if (flag == 2) {
+				r = max(abs(newImage[index0] - newImage[index1]) , abs(newImage[index0] - newImage[index2]));
+				g = max(abs(newImage[index0 + 1] - newImage[index1]) , abs(newImage[index0 + 1] - newImage[index2 + 1]));
+				b = max(abs(newImage[index0 + 2] - newImage[index1]) , abs(newImage[index0 + 2] - newImage[index2 + 2]));
+			}
+			if (r < threash)r = 0;
+			if (g < threash)g = 0;
+			if (b < threash)b = 0;
+
+			r = r * ratio + newImage[index0];
+			g = g * ratio + newImage[index0 + 1];
+			b = b * ratio + newImage[index0 + 2];
+
+
+			imageData[index0] = max(0, min(255, r));
+			imageData[index0 + 1] =  max(0, min(255, g));
+			imageData[index0 + 2] =  max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
+}
+void ImagePrewitt(unsigned char * imageData, int width, int height, float ratio, float threash,int flag)
+{
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	int kernelX[3][3] = {
+	{1,0,-1},
+	{1,0,-1},
+	{1,0,-1} };
+	int kernelY[3][3] = {
+	{1,1,1},
+	{0,0,0},
+	{-1,-1,-1} };
+	int sizeKernel = 3;
+	int sumKernel = 3;
+	for (int x = sizeKernel / 2; x < width - sizeKernel / 2; x++)
+	{
+		for (int y = sizeKernel / 2; y < height - sizeKernel / 2; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int rx = 0,ry = 0,gx= 0,gy = 0,bx=0,by=0;
+			for (int i = -sizeKernel / 2; i <= sizeKernel / 2; i++)
+			{
+				for (int j = -sizeKernel / 2; j <= sizeKernel / 2; j++)
+				{
+					int index = ((y + i)*width + x + j) * 4;
+					rx += newImage[index] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					gx += newImage[index + 1] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					bx += newImage[index + 2] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+
+					ry += newImage[index] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					gy += newImage[index + 1] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					by += newImage[index + 2] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+				}
+			}
+			if (flag == 0) {
+				r = sqrt(rx * rx + ry * ry);
+				g = sqrt(gx * gx + gy * gy);
+				b = sqrt(bx * bx + by * by);
+			}
+			else if (flag == 1) {
+				r = abs(rx) + abs(ry);
+				g = abs(gx) + abs(gy);
+				b = abs(bx) + abs(by);
+			}
+			else if (flag == 2) {
+				r = max(abs(rx), abs(ry));
+				g = max(abs(gx), abs(gy));
+				b = max(abs(bx), abs(by));
+			}
+			if (r < threash)r = 0;
+			if (g < threash)g = 0;
+			if (b < threash)b = 0;
+
+			int index = (y*width + x) * 4;
+			r = r * ratio + newImage[index];
+			g = g * ratio + newImage[index + 1];
+			b = b * ratio + newImage[index + 2];
+
+			imageData[index] = max(0, min(255, r));
+			imageData[index + 1] = max(0, min(255, g));
+			imageData[index + 2] = max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
+}
+void ImageSobel(unsigned char * imageData, int width, int height, float ratio, float threash, int flag)
+{
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	int kernelX[3][3] = {
+	{1,0,-1},
+	{2,0,-2},
+	{1,0,-1} };
+	int kernelY[3][3] = {
+	{1,2,1},
+	{0,0,0},
+	{-1,-2,-1} };
+	int sizeKernel = 3;
+	int sumKernel = 3;
+	for (int x = sizeKernel / 2; x < width - sizeKernel / 2; x++)
+	{
+		for (int y = sizeKernel / 2; y < height - sizeKernel / 2; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int rx = 0, ry = 0, gx = 0, gy = 0, bx = 0, by = 0;
+			for (int i = -sizeKernel / 2; i <= sizeKernel / 2; i++)
+			{
+				for (int j = -sizeKernel / 2; j <= sizeKernel / 2; j++)
+				{
+					int index = ((y + i)*width + x + j) * 4;
+					rx += newImage[index] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					gx += newImage[index + 1] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					bx += newImage[index + 2] * kernelX[sizeKernel / 2 + i][sizeKernel / 2 + j];
+
+					ry += newImage[index] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					gy += newImage[index + 1] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					by += newImage[index + 2] * kernelY[sizeKernel / 2 + i][sizeKernel / 2 + j];
+				}
+			}
+			if (flag == 0) {
+				r = sqrt(rx * rx + ry * ry);
+				g = sqrt(gx * gx + gy * gy);
+				b = sqrt(bx * bx + by * by);
+			}
+			else if (flag == 1) {
+				r = abs(rx) + abs(ry);
+				g = abs(gx) + abs(gy);
+				b = abs(bx) + abs(by);
+			}
+			else if (flag == 2) {
+				r = max(abs(rx), abs(ry));
+				g = max(abs(gx), abs(gy));
+				b = max(abs(bx), abs(by));
+			}
+			if (r < threash)r = 0;
+			if (g < threash)g = 0;
+			if (b < threash)b = 0;
+
+			int index = (y*width + x) * 4;
+			r = r * ratio + newImage[index];
+			g = g * ratio + newImage[index + 1];
+			b = b * ratio + newImage[index + 2];
+
+			imageData[index] = max(0, min(255, r));
+			imageData[index + 1] = max(0, min(255, g));
+			imageData[index + 2] = max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
+}
+void ImageQualc(unsigned char * imageData, int width, int height, float threash)
+{
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	int kernel[3][3] = {
+	{1,-2,1},
+	{-2,5,-2},
+	{1,-2,1} };
+	int sizeKernel = 3;
+	int sumKernel = 3;
+	for (int x = sizeKernel / 2; x < width - sizeKernel / 2; x++)
+	{
+		for (int y = sizeKernel / 2; y < height - sizeKernel / 2; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			for (int i = -sizeKernel / 2; i <= sizeKernel / 2; i++)
+			{
+				for (int j = -sizeKernel / 2; j <= sizeKernel / 2; j++)
+				{
+					int index = ((y + i)*width + x + j) * 4;
+					r += newImage[index] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					g += newImage[index + 1] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					b += newImage[index + 2] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+				}
+			}
+			int index = (y*width + x) * 4;
+			r = r * threash + newImage[index];
+			g = g * threash + newImage[index + 1];
+			b = b * threash + newImage[index + 2];
+			imageData[index] = max(0, min(255, r));
+			imageData[index + 1] = max(0, min(255, g));
+			imageData[index + 2] = max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
+}
+
+void ImageLog(unsigned char * imageData, int width, int height, float threash)
+{
+	unsigned char *newImage;
+	newImage = new unsigned char[width * height * 4];
+	memcpy(newImage, imageData, width * height * 4);
+	int kernel[5][5] = {
+	{0,0,-1,0,0},
+	{0,-1,-2,-1,0},
+	{-1,-2,16,-2,-1},
+	{0,-1,-2,-1,0}, 
+	{0,0,-1,0,0}};
+	int sizeKernel = 5;
+	int sumKernel = 5;
+	for (int x = sizeKernel / 2; x < width - sizeKernel / 2; x++)
+	{
+		for (int y = sizeKernel / 2; y < height - sizeKernel / 2; y++)
+		{
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			for (int i = -sizeKernel / 2; i <= sizeKernel / 2; i++)
+			{
+				for (int j = -sizeKernel / 2; j <= sizeKernel / 2; j++)
+				{
+					int index = ((y + i)*width + x + j) * 4;
+					r += newImage[index] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					g += newImage[index + 1] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+					b += newImage[index + 2] * kernel[sizeKernel / 2 + i][sizeKernel / 2 + j];
+				}
+			}
+			int index = (y*width + x) * 4;
+			r = r * threash + newImage[index];
+			g = g * threash + newImage[index + 1];
+			b = b * threash + newImage[index + 2];
+			imageData[index] = max(0, min(255, r));
+			imageData[index + 1] = max(0, min(255, g));
+			imageData[index + 2] = max(0, min(255, b));
+		}
+	}
+	delete[] newImage;
+	newImage = NULL;
 }

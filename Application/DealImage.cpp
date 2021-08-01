@@ -403,6 +403,89 @@ void DealImage::on_action_high_6_triggered()
 	imshow("glpfhp", GLPFImage);
 	delete[]tmpData;
 }
+void DealImage::on_action_hisEqu_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageHisEqu((unsigned char*)result.datastart, curImage.width(), curImage.height());
+	imshow("hisEqu", result);
+}
+void DealImage::on_action_hisSML_triggered(){
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	double zhist[3][256] = { 0 };
+	for (int i = 0; i <= 255; i++) {
+		for (int k = 0; k < 3; k++) {
+			zhist[k][i] = i / 255.0f;
+		}
+	}
+	ImageHisSML((unsigned char*)result.datastart, curImage.width(), curImage.height(),zhist);
+	imshow("hisSML", result);
+}
+void DealImage::on_action_hisGML_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	double zhist[3][256] = { 0 };
+	for (int i = 0; i <= 255; i++) {
+		for (int k = 0; k < 3; k++) {
+			zhist[k][i] = i / 255.0f;
+		}
+	}
+	ImageHisGML((unsigned char*)result.datastart, curImage.width(), curImage.height(), zhist);
+	imshow("hisGML", result);
+}
+void DealImage::on_action_lpls_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	SharpLaplacian((unsigned char*)result.datastart, curImage.width(), curImage.height(),0.15);
+	imshow("lpls", result);
+}
+void DealImage::on_action_grad_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageGrad((unsigned char*)result.datastart, curImage.width(), curImage.height(),0.3, 10,0);
+	imshow("grad", result);
+}
+void DealImage::on_action_prewitt_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImagePrewitt((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.3, 10, 0);
+	imshow("prewitt", result);
+}
+void DealImage::on_action_sobel_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageSobel((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.3, 10, 0);
+	imshow("sobel", result);
+}
+void DealImage::on_action_qualc_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageQualc((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.3);
+	imshow("qualc", result);
+}
+void DealImage::on_action_log_triggered()
+{
+	if (!imageFlag)return;
+	cv::Mat tmpImg(curImage.height(), curImage.width(), CV_8UC4, (uchar*)curImage.bits(), curImage.bytesPerLine());
+	Mat result = tmpImg.clone();
+	ImageLog((unsigned char*)result.datastart, curImage.width(), curImage.height(), 0.15);
+	imshow("log", result);
+}
 void DealImage::mousePressEvent(QMouseEvent *event) // 鼠标按下事件
 {
 	int x = event->pos().x() - ui.groupBox->x();
@@ -504,13 +587,6 @@ void DealImage::ShowImage() {
 	tmp = QImage((const uchar *)result.data, result.cols, result.rows, result.step, QImage::Format_RGB32).copy();
 	curImage = tmp.copy();
 	tmp = tmp.copy(x, y, ui.label->width(), ui.label->height());
-	//cvtColor(result, result, CV_RGBA2RGB);
-	//fftPair fft = fftPair(result);
-	//Mat fft_img = fft2d(&fft);
-	//imshow("fft", fft_img);
-
-	//Mat ifft_img = ifft2d(&fft);
-	//imshow("ifft", ifft_img);
 	ui.label->setPixmap(QPixmap::fromImage(tmp));
 }
 void DealImage::translate_image() {

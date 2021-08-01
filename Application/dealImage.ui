@@ -653,11 +653,6 @@
      <string>颜色处理</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menu_6">
-    <property name="title">
-     <string>图像增强</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menu_7">
     <property name="title">
      <string>滤镜</string>
@@ -698,16 +693,75 @@
     <addaction name="menu_10"/>
     <addaction name="menu_11"/>
    </widget>
+   <widget class="QMenu" name="menu_12">
+    <property name="title">
+     <string>空域处理</string>
+    </property>
+    <widget class="QMenu" name="menua">
+     <property name="title">
+      <string>线性滤波</string>
+     </property>
+     <addaction name="actiona1"/>
+     <addaction name="actiona2"/>
+     <addaction name="actiona3"/>
+     <addaction name="actiona4"/>
+    </widget>
+    <widget class="QMenu" name="menub">
+     <property name="title">
+      <string>非线性滤波</string>
+     </property>
+     <addaction name="actiona1_2"/>
+     <addaction name="actiona2_2"/>
+    </widget>
+    <widget class="QMenu" name="menud">
+     <property name="title">
+      <string>图像锐化(边缘检测）</string>
+     </property>
+     <addaction name="action_grad"/>
+     <addaction name="action_prewitt"/>
+     <addaction name="action_sobel"/>
+     <addaction name="action_log"/>
+     <addaction name="action_qualc"/>
+     <addaction name="action_lpls"/>
+    </widget>
+    <widget class="QMenu" name="menua_2">
+     <property name="title">
+      <string>直方图处理</string>
+     </property>
+     <widget class="QMenu" name="menu_6">
+      <property name="title">
+       <string>直方图规定化</string>
+      </property>
+      <addaction name="action_hisSML"/>
+      <addaction name="action_hisGML"/>
+     </widget>
+     <addaction name="action_hisEqu"/>
+     <addaction name="menu_6"/>
+    </widget>
+    <widget class="QMenu" name="menub_2">
+     <property name="title">
+      <string>灰度变换</string>
+     </property>
+     <addaction name="actionb1"/>
+     <addaction name="actionn2"/>
+     <addaction name="actionn3"/>
+    </widget>
+    <addaction name="menua"/>
+    <addaction name="menub"/>
+    <addaction name="menud"/>
+    <addaction name="menua_2"/>
+    <addaction name="menub_2"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_E"/>
    <addaction name="menu_2"/>
    <addaction name="menu_3"/>
    <addaction name="menu_4"/>
    <addaction name="menu_5"/>
-   <addaction name="menu_6"/>
    <addaction name="menu_7"/>
    <addaction name="menu_8"/>
    <addaction name="menu_9"/>
+   <addaction name="menu_12"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -729,16 +783,6 @@
   <action name="actionIFFT">
    <property name="text">
     <string>IFFT</string>
-   </property>
-  </action>
-  <action name="actionDCT">
-   <property name="text">
-    <string>DCT</string>
-   </property>
-  </action>
-  <action name="actionFDCT">
-   <property name="text">
-    <string>FDCT</string>
    </property>
   </action>
   <action name="action_low_1">
@@ -794,6 +838,96 @@
   <action name="action_high_6">
    <property name="text">
     <string>高频增强滤波</string>
+   </property>
+  </action>
+  <action name="actiona1">
+   <property name="text">
+    <string>邻域平均</string>
+   </property>
+  </action>
+  <action name="actiona2">
+   <property name="text">
+    <string>选择平均</string>
+   </property>
+  </action>
+  <action name="actiona3">
+   <property name="text">
+    <string>加权平均</string>
+   </property>
+  </action>
+  <action name="actiona4">
+   <property name="text">
+    <string>Wiener滤波</string>
+   </property>
+  </action>
+  <action name="actiona1_2">
+   <property name="text">
+    <string>中值滤波</string>
+   </property>
+  </action>
+  <action name="actiona2_2">
+   <property name="text">
+    <string>序统计滤波</string>
+   </property>
+  </action>
+  <action name="action_grad">
+   <property name="text">
+    <string>梯度法</string>
+   </property>
+  </action>
+  <action name="action_prewitt">
+   <property name="text">
+    <string>Prewitt算子</string>
+   </property>
+  </action>
+  <action name="action_sobel">
+   <property name="text">
+    <string>Sobel算子</string>
+   </property>
+  </action>
+  <action name="action_log">
+   <property name="text">
+    <string>Log算子</string>
+   </property>
+  </action>
+  <action name="action_qualc">
+   <property name="text">
+    <string>高通滤波</string>
+   </property>
+  </action>
+  <action name="action_hisEqu">
+   <property name="text">
+    <string>直方图均衡化</string>
+   </property>
+  </action>
+  <action name="actionb1">
+   <property name="text">
+    <string>比例线性变换</string>
+   </property>
+  </action>
+  <action name="actionn2">
+   <property name="text">
+    <string>分段线性变换</string>
+   </property>
+  </action>
+  <action name="actionn3">
+   <property name="text">
+    <string>非线性变换</string>
+   </property>
+  </action>
+  <action name="action_hisSML">
+   <property name="text">
+    <string>单映射</string>
+   </property>
+  </action>
+  <action name="action_hisGML">
+   <property name="text">
+    <string>组映射</string>
+   </property>
+  </action>
+  <action name="action_lpls">
+   <property name="text">
+    <string>拉普拉斯</string>
    </property>
   </action>
  </widget>
