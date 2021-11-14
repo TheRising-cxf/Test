@@ -14,5 +14,8 @@ signals:
 
 private:
 	Ui::OtherWindow ui;
+private slots:
+	void StartRecord();
+	void StopRecord();
 };
 

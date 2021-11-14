@@ -2,31 +2,25 @@
 #include "PacketQueue.h"
 #include <iostream>
 
-extern bool Quit;
-
 PacketQueue::PacketQueue()
 {
 	nb_packets = 0;
 	size       = 0;
-
-	mutex      = SDL_CreateMutex();
-	cond       = SDL_CreateCond();
 }
 
 bool PacketQueue::enQueue(const AVPacket *packet)
 {
-	AVPacket *pkt = av_packet_alloc();
-	if (av_packet_ref(pkt, packet) < 0)
+	AVPacket pkt;
+	if (av_packet_ref(&pkt, packet) < 0)
 		return false;
 
-	SDL_LockMutex(mutex);
-	queue.push(*pkt);
+	g_Vmutex.lock();
+	queue.push(pkt);
 
-	size += pkt->size;
+	size += pkt.size;
 	nb_packets++;
 
-	SDL_CondSignal(cond);
-	SDL_UnlockMutex(mutex);
+	g_Vmutex.unlock();
 	return true;
 }
 
@@ -34,15 +28,9 @@ bool PacketQueue::deQueue(AVPacket *packet, bool block)
 {
 	bool ret = false;
 
-	SDL_LockMutex(mutex);
+	g_Vmutex.lock();
 	while (true)
 	{
-		if (Quit)
-		{
-			ret = false;
-			break;
-		}
-
 		if (!queue.empty())
 		{
 			if (av_packet_ref(packet, &queue.front()) < 0)
@@ -67,9 +55,9 @@ bool PacketQueue::deQueue(AVPacket *packet, bool block)
 		}
 		else
 		{
-			SDL_CondWait(cond, mutex);
+			
 		}
 	}
-	SDL_UnlockMutex(mutex);
+	g_Vmutex.unlock();
 	return ret;
 }

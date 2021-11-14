@@ -11,16 +11,18 @@
 #include "PacketQueue.h"
 #include "Audio.h"
 #include "Media.h"
-#include "VideoDisplay.h"
 #include <iostream>
 using namespace std;
-
-bool Quit = false;
+extern int  g_stopAudio;
+extern int  g_isFinish;//正常播放完退出
+extern bool g_isStop;//暂停播放
+extern bool g_isExitThread;//直接退出
+extern bool g_exitReadAV;
+extern std::mutex g_mutex;
 DealVideo::DealVideo(QWidget *parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	ui.comboBox->addItem("视频输入");
 	QList<QCameraInfo> cameras = QCameraInfo::availableCameras();
 	foreach(const QCameraInfo &cameraInfo, cameras) {
 		ui.comboBox->addItem(cameraInfo.description());
@@ -33,10 +35,20 @@ DealVideo::DealVideo(QWidget *parent)
 	readCap = new ReadCap();
 	readAudio = new ReadAudio();
 	connect(readAV, SIGNAL(return_QImage(QImage)), this, SLOT(show_image_1(QImage)));
+	connect(readAV, SIGNAL(return_Finish()), this, SLOT(returnPlayFinish()));
 	connect(readCap, SIGNAL(return_QImage(QImage)), this, SLOT(show_image_1(QImage)));
+	g_stopAudio = 0;
+	g_isFinish = 0;
+	g_isStop = false;
+	g_isExitThread = false;
+	g_exitReadAV = false;
 }
 DealVideo::~DealVideo()
 {
+	g_mutex.lock();
+	g_isExitThread = true;
+	g_exitReadAV = true;
+	g_mutex.unlock();
 	cap.release();
 	if (readAV != NULL) {
 		delete readAV;
@@ -50,6 +62,10 @@ DealVideo::~DealVideo()
 }
 void DealVideo::closeEvent(QCloseEvent *)
 {
+	g_mutex.lock();
+	g_isExitThread = true;
+	g_exitReadAV = true;
+	g_mutex.unlock();
 	readAV->quit();
 	readCap->quit();
 	readAudio->quit();
@@ -86,16 +102,46 @@ void DealVideo::on_display_clicked()
 	}
 }
 
-void DealVideo::on_stop_clicked()
+void DealVideo::on_playVideo_clicked()
 {
-	if (ui.stop->text() == "暂停") {
-		ui.stop->setText("继续");
+	if (ui.playVideo->text() == "暂停") {
+		ui.playVideo->setText("播放");
+		g_mutex.lock();
+		g_isStop = true;
+		g_mutex.unlock();
 	}
-	else {
-		ui.stop->setText("暂停");
+	else if (ui.playVideo->text() == "播放") {
+		if (readAV->filePath != "") {
+			g_mutex.lock();
+			g_isExitThread = false;
+			g_isStop = false;
+			g_stopAudio = 0;
+			g_mutex.unlock();
+			ui.playVideo->setText("暂停");
+			readAV->start();
+		}
 	}
 }
 
+void DealVideo::on_selectFile_clicked()
+{
+	QString vedioPath = QFileDialog::getOpenFileName(this,
+		tr("选择视频！"),
+		"F:",
+		tr("视频文件(*.*)"));
+	if (vedioPath != NULL) {
+		ui.playVideo->setText("播放");
+		std::string s = vedioPath.toStdString();
+		readAV->setFilePath(s);
+		g_mutex.lock();
+			g_isExitThread = true;
+			g_isStop = true;
+		g_mutex.unlock();
+	}
+}
+void DealVideo::returnPlayFinish() {
+	ui.playVideo->setText("播放");
+}
 void DealVideo::show_image_1(QImage dstImage)
 {
 	QImage img = dstImage;

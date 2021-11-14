@@ -1,27 +1,20 @@
 
 #include "Video.h"
-#include "VideoDisplay.h"
-
+#include "mutex"
+#include <Windows.h>
 extern "C"{
 
 #include <libswscale\swscale.h>
 
 }
-
 VideoState::VideoState()
 {
 	video_ctx        = nullptr;
 	stream_index     = -1;
 	stream           = nullptr;
 
-	window           = nullptr;
-	bmp              = nullptr;
-	renderer         = nullptr;
-
 	frame            = nullptr;
 	displayFrame     = nullptr;
-
-	videoq           = new PacketQueue();
 
 	frame_timer      = 0.0;
 	frame_last_delay = 0.0;
@@ -31,7 +24,7 @@ VideoState::VideoState()
 
 VideoState::~VideoState()
 {
-	delete videoq;
+	avcodec_close(video_ctx);
 	if(frame!=NULL)
 		av_frame_free(&frame);
 	if (displayFrame != NULL)
@@ -40,9 +33,19 @@ VideoState::~VideoState()
 			av_free(displayFrame->data[0]);
 		av_frame_free(&displayFrame);
 	}
+	while (!videoq.queue.empty()) {
+		AVPacket pkt = videoq.queue.front();
+		videoq.queue.pop();
+		av_free_packet(&pkt);
+	}
+	while (!frameq.queue.empty()) {
+		AVFrame *frame = frameq.queue.front();
+		frameq.queue.pop();
+		av_frame_free(&frame);
+	}
 }
 
-void VideoState::video_play(MediaState *media)
+void VideoState::videoPlayInit(MediaState *media)
 {
 	int width = media->frameWidth;
 	int height = media->frameHeight;
@@ -58,10 +61,6 @@ void VideoState::video_play(MediaState *media)
 	uint8_t *buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
 
 	avpicture_fill((AVPicture*)displayFrame, buffer, (AVPixelFormat)displayFrame->format, displayFrame->width, displayFrame->height);
-
-	SDL_CreateThread(decode, "", this);
-
-	schedule_refresh(media, 40); // start display
 }
 
 double VideoState::synchronize(AVFrame *srcFrame, double pts)
@@ -80,51 +79,3 @@ double VideoState::synchronize(AVFrame *srcFrame, double pts)
 
 	return pts;
 }
-
-
-int  decode(void *arg)
-{
-	VideoState *video = (VideoState*)arg;
-
-	AVFrame *frame = av_frame_alloc();
-
-	AVPacket packet;
-	double pts;
-
-	while (true)
-	{
-		video->videoq->deQueue(&packet, true);
-
-		int ret = avcodec_send_packet(video->video_ctx, &packet);
-		if (ret < 0 && ret != AVERROR(EAGAIN) && ret != AVERROR_EOF)
-			continue;
-
-		ret = avcodec_receive_frame(video->video_ctx, frame);
-		if (ret < 0 && ret != AVERROR_EOF)
-			continue;
-
-		if ((pts = av_frame_get_best_effort_timestamp(frame)) == AV_NOPTS_VALUE)
-			pts = 0;
-		
-		pts *= av_q2d(video->stream->time_base);
-
-		pts = video->synchronize(frame, pts);
-
-		frame->opaque = &pts;
-
-		if (video->frameq.nb_frames >= FrameQueue::capacity)
-		{
-			SDL_Delay(500 * 2);
-		}
-
-		video->frameq.enQueue(frame);
-
-		av_frame_unref(frame);
-	}
-
-
-	av_frame_free(&frame);
-
-	return 0;
-}
-

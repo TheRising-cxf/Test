@@ -117,8 +117,8 @@
     <ClCompile Include="Media.cpp" />
     <ClCompile Include="PacketQueue.cpp" />
     <ClCompile Include="qmydisplaydevice.cpp" />
+    <ClCompile Include="ThreadFunc.cpp" />
     <ClCompile Include="Video.cpp" />
-    <ClCompile Include="VideoDisplay.cpp" />
     <QtRcc Include="DemoApplication.qrc" />
     <QtUic Include="dealAudio.ui" />
     <QtUic Include="dealConnect.ui" />
@@ -153,8 +153,8 @@
     <ClInclude Include="FrameQueue.h" />
     <ClInclude Include="ImageProcessAlgorithom.h" />
     <ClInclude Include="PacketQueue.h" />
+    <ClInclude Include="ThreadFunc.h" />
     <ClInclude Include="Video.h" />
-    <ClInclude Include="VideoDisplay.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

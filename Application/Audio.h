@@ -39,19 +39,9 @@ struct AudioState
 	*/
 	bool audio_play();
 
+	void audio_close();
+
 	// get audio clock
 	double get_audio_clock();
 };
-
-/**
- * 向设备发送audio数据的回调函数
- */
-void audio_callback(void* userdata, Uint8 *stream, int len);
-
-/**
- * 解码Avpacket中的数据填充到缓冲空间
- */
-int audio_decode_frame(AudioState *audio_state, uint8_t *audio_buf, int buf_size);
-
-
 #endif

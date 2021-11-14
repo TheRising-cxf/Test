@@ -11,8 +11,11 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
+#include <libavutil\time.h>
 }
 using namespace std;
+static const double SYNC_THRESHOLD = 0.01;
+static const double NOSYNC_THRESHOLD = 10.0;
 class ReadAV :public QThread {
 
 	Q_OBJECT
@@ -24,6 +27,7 @@ public:
 	void run();
 signals:
 	int return_QImage(QImage dstImage);
+	int return_Finish();
 };
 class ReadCap :public QThread {
 
@@ -47,6 +51,4 @@ public:
 	string audioName;
 	void setAudioName(string s);
 	void run();
-	//signals:
-	//	int return_QImage(QImage dstImage);
 };

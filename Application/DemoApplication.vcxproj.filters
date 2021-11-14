@@ -73,9 +73,6 @@
     <ClCompile Include="Video.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VideoDisplay.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DealConnect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,6 +80,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ImageProcessAlgorithom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -145,10 +145,10 @@
     <ClInclude Include="Video.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VideoDisplay.h">
+    <ClInclude Include="ImageProcessAlgorithom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImageProcessAlgorithom.h">
+    <ClInclude Include="ThreadFunc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

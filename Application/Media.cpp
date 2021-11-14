@@ -5,10 +5,7 @@
 extern "C"{
 #include <libavutil/time.h>
 }
-extern bool Quit;
-
-MediaState::MediaState(char* input_file)
-	:filename(input_file)
+MediaState::MediaState()
 {
 	pFormatCtx = nullptr;
 	audio = new AudioState();
@@ -20,6 +17,7 @@ MediaState::MediaState(char* input_file)
 
 MediaState::~MediaState()
 {
+	avformat_close_input(&pFormatCtx);
 	if(audio)
 		delete audio;
 
@@ -82,6 +80,8 @@ bool MediaState::openInputAV()
 
 	frameWidth = video->stream->codec->width;
 	frameHeight = video->stream->codec->height;
+	av_free(pVCodec);
+	av_free(pCodec);
 
 	return true;
 }
@@ -179,48 +179,6 @@ bool MediaState::openInputAudio()
 	return true;
 }
 
-int decode_thread(void *data)
-{
-	MediaState *media = (MediaState*)data;
-
-	AVPacket *packet = av_packet_alloc();
-
-	while (true)
-	{
-		int ret = av_read_frame(media->pFormatCtx, packet);
-		if (ret < 0)
-		{
-			if (ret == AVERROR_EOF)
-				break;
-			if (media->pFormatCtx->pb->error == 0) // No error,wait for user input
-			{
-				SDL_Delay(10);
-				continue;
-			}
-			else
-				break;
-		}
-
-		if (packet->stream_index == media->audio->stream_index) // audio stream
-		{
-			media->audio->audioq.enQueue(packet);
-			av_packet_unref(packet);
-		}		
-
-		else if (packet->stream_index == media->video->stream_index) // video stream
-		{
-			media->video->videoq->enQueue(packet);
-			av_packet_unref(packet);
-		}		
-		else
-			av_packet_unref(packet);
-	}
-
-	av_packet_free(&packet);
-
-	return 0;
-}
-
 int decode_thread_Cap(void *data)
 {
 	MediaState *media = (MediaState*)data;
@@ -251,7 +209,7 @@ int decode_thread_Cap(void *data)
 
 	while (av_read_frame(media->pFormatCtx, packet) >= 0) {
 		if (packet->stream_index == video_index) {
-			media->video->videoq->enQueue(packet);
+			media->video->videoq.enQueue(packet);
 			av_packet_unref(packet);
 		}
 		else {

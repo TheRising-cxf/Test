@@ -3,7 +3,7 @@
 #define PACKET_QUEUE_H
 
 #include <queue>
-
+#include <mutex>
 #include <SDL.h>
 #include <SDL_thread.h>
 
@@ -19,9 +19,7 @@ struct PacketQueue
 
 	Uint32    nb_packets;
 	Uint32    size;
-	SDL_mutex *mutex;
-	SDL_cond  *cond;
-
+	std::mutex g_Vmutex;
 	PacketQueue();
 	bool enQueue(const AVPacket *packet);
 	bool deQueue(AVPacket *packet, bool block);

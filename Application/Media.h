@@ -7,10 +7,8 @@
 #include "Video.h"
 
 extern "C" {
-
 #include <libavformat\avformat.h>
 #include <libavdevice\avdevice.h>
-
 }
 class WavHeader {
 private:
@@ -63,17 +61,11 @@ struct MediaState
 
 
 	char* filename;
-	//bool quit;
 
-	MediaState(char *filename);
+	MediaState();
 	~MediaState();
-
 	bool openInputAV();
 	bool openInputcap();
 	bool openInputAudio();
 };
-
-int decode_thread(void *data);
-int decode_thread_Cap(void *data);
-
 #endif

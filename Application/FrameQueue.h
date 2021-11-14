@@ -3,6 +3,7 @@
 #define FRAME_QUEUE_H
 
 #include <SDL_thread.h>
+#include<mutex>
 #include <queue>
 
 extern "C"{
@@ -18,10 +19,7 @@ struct FrameQueue
 	std::queue<AVFrame*> queue;
 
 	uint32_t nb_frames;
-
-	SDL_mutex* mutex;
-	SDL_cond * cond;
-
+	std::mutex g_mutex;
 	FrameQueue();
 	bool enQueue(const AVFrame* frame);
 	bool deQueue(AVFrame **frame);

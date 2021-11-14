@@ -30,6 +30,7 @@ private:
 	Mat frame;
 	int cameraIndex = -1;
 	int audioIndex = -1;
+	float playSpeed = 1.0f;
 	ReadAV* readAV;
 	ReadCap* readCap;
 	ReadAudio* readAudio;
@@ -37,6 +38,8 @@ private:
 private slots:
 	void on_comboBox_currentIndexChanged();
 	void on_display_clicked();
-	void on_stop_clicked();
+	void on_playVideo_clicked();
+	void on_selectFile_clicked();
+	void returnPlayFinish();
 	void show_image_1(QImage dstImage);
 };
