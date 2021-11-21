@@ -9,6 +9,7 @@
 #include <QThread>
 #include <iostream>
 #include "FFmpegUse.h"
+#include "MainLoop.h"
 using namespace std;
 #pragma execution_character_set("utf-8")
 using namespace cv;
@@ -32,14 +33,19 @@ private:
 	int audioIndex = -1;
 	float playSpeed = 1.0f;
 	ReadAV* readAV;
-	ReadCap* readCap;
-	ReadAudio* readAudio;
+	ReadDevices * readDevices;
+
 	int currenOperate;
+	int m_m, m_s;
 private slots:
 	void on_comboBox_currentIndexChanged();
 	void on_display_clicked();
 	void on_playVideo_clicked();
 	void on_selectFile_clicked();
+	void on_photo_clicked();
+	void on_recordVideo_click();
 	void returnPlayFinish();
+	void GetTime(double time);
+	void show_image_1(QImage dstImage, double time);
 	void show_image_1(QImage dstImage);
 };

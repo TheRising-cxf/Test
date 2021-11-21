@@ -67,6 +67,19 @@ bool video_refresh_timer(void *userdata)
 		return false;
 	}
 }
+cv::Mat AVFrameToCVMat(const AVFrame* frame) {
+	int width = frame->width;
+	int height = frame->height;
+	cv::Mat image(height, width, CV_8UC3);
+	int cv_lines_sizes[1];
+	cv_lines_sizes[0] = image.step1();
+	SwsContext* conversion = sws_getContext(width, height, (AVPixelFormat)frame->format,
+		width, height, AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR,
+		nullptr, nullptr, nullptr);
+	sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cv_lines_sizes);
+	sws_freeContext(conversion);
+	return image;
+}
 ReadAV::~ReadAV()
 {
 }
@@ -114,11 +127,10 @@ void ReadAV::run()
 
 		double audio_duration = audio_stream->duration * av_q2d(audio_stream->time_base);
 		double video_duration = video_stream->duration * av_q2d(video_stream->time_base);
-
-		cout << "audio时长：" << audio_duration << endl;
-		cout << "video时长：" << video_duration << endl;
+		emit return_videoTime(video_duration);
 		double lastAudioClock = 0;
 		bool isLastStop = true;
+		bool isFirst = true;
 		while (true) {
 			g_mutex.lock();
 			if (g_isFinish == 2|| g_isExitThread) {
@@ -144,15 +156,16 @@ void ReadAV::run()
 				media.video->frame_timer = static_cast<double>(av_gettime()) / 1000000.0;
 			}
 			g_mutex.unlock();
-			//double ref_clock = media.audio->get_audio_clock();
-			//if (fabs(ref_clock - lastAudioClock) < 0.0001) {
-			//	continue;
-			//}
-			//lastAudioClock = ref_clock;
 			if (video_refresh_timer(&media)) {
 				QImage  Qimg((uchar*)media.video->displayFrame->data[0], media.video->video_ctx->width, media.video->video_ctx->height, QImage::Format_RGB32);
-				emit return_QImage(Qimg.copy());
+				emit return_QImage(Qimg.copy(), media.video->frame_last_pts);
 				av_frame_unref(media.video->frame);
+				g_mutex.lock();
+				if (isFirst) {
+					isFirst = false;
+					g_isStop = true;
+				}
+				g_mutex.unlock();
 			}
 			else {
 				Sleep(10);
@@ -162,7 +175,6 @@ void ReadAV::run()
 		m_decodeThread.join();
 		media.audio->audio_close();
 		g_mutex.lock();
-			g_isStop = true;
 			g_isFinish = 0;
 			g_stopAudio = 0;
 			g_isExitThread = false;
@@ -170,86 +182,4 @@ void ReadAV::run()
 		emit return_Finish();
 	}
 	return;
-}
-
-ReadCap::~ReadCap()
-{
-}
-
-void ReadCap::setCapName(string s)
-{
-	capName = s;
-}
-cv::Mat AVFrameToCVMat(const AVFrame* frame) {
-	int width = frame->width;
-	int height = frame->height;
-	cv::Mat image(height, width, CV_8UC3);
-	int cv_lines_sizes[1];
-	cv_lines_sizes[0] = image.step1();
-	SwsContext* conversion = sws_getContext(width, height, (AVPixelFormat)frame->format,
-		width, height, AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR,
-		nullptr, nullptr, nullptr);
-	sws_scale(conversion, frame->data, frame->linesize, 0, height, &image.data, cv_lines_sizes);
-	sws_freeContext(conversion);
-	return image;
-}
-void ReadCap::run()
-{
-	avdevice_register_all();
-
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
-	char filename[100];
-	strcpy(filename, capName.c_str());
-	MediaState media;
-
-	if (!media.openInputcap()) {
-		return;
-	}
-	int width = media.frameWidth;
-	int height = media.frameHeight;
-
-	media.video->frame = av_frame_alloc();
-	media.video->displayFrame = av_frame_alloc();
-
-	media.video->displayFrame->format = AV_PIX_FMT_RGB32;
-	media.video->displayFrame->width = width;
-	media.video->displayFrame->height = height;
-
-	int numBytes = avpicture_get_size((AVPixelFormat)media.video->displayFrame->format, media.video->displayFrame->width, media.video->displayFrame->height);
-	uint8_t *buffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
-
-	avpicture_fill((AVPicture*)media.video->displayFrame, buffer, (AVPixelFormat)media.video->displayFrame->format, media.video->displayFrame->width, media.video->displayFrame->height);
-
-	//while (true) {
-	//	if (video_refresh_timer(&media)) {
-	//		QImage  Qimg((uchar*)media.video->displayFrame->data[0], media.video->video_ctx->width, media.video->video_ctx->height, QImage::Format_RGB32);
-	//		Qimg = Qimg.mirrored(true, false);
-	//		emit return_QImage(Qimg);
-	//		av_frame_unref(media.video->frame);
-	//	}
-	//}
-
-}
-ReadAudio::~ReadAudio()
-{
-}
-
-void ReadAudio::setAudioName(string s)
-{
-	audioName = s;
-}
-
-void ReadAudio::run()
-{
-	avdevice_register_all();
-
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
-	char filename[100];
-	strcpy(filename, audioName.c_str());
-	MediaState media;
-
-	if (!media.openInputAudio()) {
-		return;
-	}
-
 }

@@ -69,15 +69,8 @@ bool AudioState::audio_play()
 	return true;
 }
 void AudioState::audio_close() {
-	while (true) {
-		g_mutex.lock();
-		if (g_stopAudio == 2) {
-			g_mutex.unlock();
-			break;
-		}
-		g_mutex.unlock();
-		Sleep(10);
-	}
+	
+	Sleep(10);
 	SDL_PauseAudio(1);
 	SDL_CloseAudio();
 	return;

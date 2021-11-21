@@ -48,7 +48,7 @@
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>300</x>
       <y>670</y>
       <width>131</width>
       <height>22</height>
@@ -58,7 +58,7 @@
    <widget class="QComboBox" name="audioList">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>610</x>
       <y>670</y>
       <width>131</width>
       <height>22</height>
@@ -81,8 +81,8 @@
    <widget class="QPushButton" name="recordVideo">
     <property name="geometry">
      <rect>
-      <x>600</x>
-      <y>610</y>
+      <x>590</x>
+      <y>630</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -94,8 +94,8 @@
    <widget class="QPushButton" name="photo">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>610</y>
+      <x>400</x>
+      <y>630</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -198,6 +198,19 @@
     </property>
     <property name="text">
      <string>选择文件</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="timeLabel">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>600</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>00:00/00:00</string>
     </property>
    </widget>
   </widget>

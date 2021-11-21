@@ -110,10 +110,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="AVInputStream.cpp" />
+    <ClCompile Include="AVOutputStream.cpp" />
     <ClCompile Include="DealConnect.cpp" />
     <ClCompile Include="FFmpegUse.cpp" />
     <ClCompile Include="FrameQueue.cpp" />
     <ClCompile Include="ImageProcessAlgorithom.cpp" />
+    <ClCompile Include="MainLoop.cpp" />
     <ClCompile Include="Media.cpp" />
     <ClCompile Include="PacketQueue.cpp" />
     <ClCompile Include="qmydisplaydevice.cpp" />
@@ -150,8 +153,11 @@
     <ClInclude Include="Audio.h" />
     <QtMoc Include="DealConnect.h" />
     <QtMoc Include="FFmpegUse.h" />
+    <ClInclude Include="AVInputStream.h" />
+    <ClInclude Include="AVOutputStream.h" />
     <ClInclude Include="FrameQueue.h" />
     <ClInclude Include="ImageProcessAlgorithom.h" />
+    <QtMoc Include="MainLoop.h" />
     <ClInclude Include="PacketQueue.h" />
     <ClInclude Include="ThreadFunc.h" />
     <ClInclude Include="Video.h" />

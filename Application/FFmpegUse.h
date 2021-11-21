@@ -5,6 +5,8 @@
 #include <QCameraImageCapture>
 #include <QCameraInfo>
 #include <QThread>
+#include "AVInputStream.h"
+#include "AVOutputStream.h"
 // 调用FFmpeg的头文件
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -26,29 +28,7 @@ public:
 	void setFilePath(string s);
 	void run();
 signals:
-	int return_QImage(QImage dstImage);
-	int return_Finish();
-};
-class ReadCap :public QThread {
-
-	Q_OBJECT
-public:
-	ReadCap() {};
-	~ReadCap();
-	string capName;
-	void setCapName(string s);
-	void run();
-signals:
-	int return_QImage(QImage dstImage);
-};
-
-class ReadAudio :public QThread {
-
-	Q_OBJECT
-public:
-	ReadAudio() {};
-	~ReadAudio();
-	string audioName;
-	void setAudioName(string s);
-	void run();
+	void return_QImage(QImage dstImage,double time);
+	void return_Finish();
+	void return_videoTime(double time);
 };

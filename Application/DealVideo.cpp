@@ -1,4 +1,4 @@
-#include "DealVideo.h"
+#include <iostream>
 #include <QtWidgets/QFileDialog>
 #include <QMessageBox>
 #include <QTime>
@@ -8,10 +8,11 @@
 #include <SDL.h>
 #include <SDL_thread.h>
 
+#include "DealVideo.h"
+#include "MainLoop.h"
 #include "PacketQueue.h"
 #include "Audio.h"
 #include "Media.h"
-#include <iostream>
 using namespace std;
 extern int  g_stopAudio;
 extern int  g_isFinish;//正常播放完退出
@@ -32,11 +33,11 @@ DealVideo::DealVideo(QWidget *parent)
 		ui.audioList->addItem(audiosInfo.deviceName());
 	}
 	readAV = new ReadAV();
-	readCap = new ReadCap();
-	readAudio = new ReadAudio();
-	connect(readAV, SIGNAL(return_QImage(QImage)), this, SLOT(show_image_1(QImage)));
+	readDevices = new ReadDevices();
+	connect(readAV, SIGNAL(return_QImage(QImage,double)), this, SLOT(show_image_1(QImage,double)));
+	connect(readDevices, SIGNAL(return_QImage(QImage, double)), this, SLOT(show_image_1(QImage, double)));
 	connect(readAV, SIGNAL(return_Finish()), this, SLOT(returnPlayFinish()));
-	connect(readCap, SIGNAL(return_QImage(QImage)), this, SLOT(show_image_1(QImage)));
+	connect(readAV, SIGNAL(return_videoTime(double)), this, SLOT(GetTime(double)));
 	g_stopAudio = 0;
 	g_isFinish = 0;
 	g_isStop = false;
@@ -53,12 +54,6 @@ DealVideo::~DealVideo()
 	if (readAV != NULL) {
 		delete readAV;
 	}
-	if (readCap != NULL) {
-		delete readCap;
-	}
-	if (readAudio != NULL) {
-		delete readAudio;
-	}
 }
 void DealVideo::closeEvent(QCloseEvent *)
 {
@@ -67,8 +62,6 @@ void DealVideo::closeEvent(QCloseEvent *)
 	g_exitReadAV = true;
 	g_mutex.unlock();
 	readAV->quit();
-	readCap->quit();
-	readAudio->quit();
 	emit ExitWin();
 }
 void DealVideo::on_comboBox_currentIndexChanged() {
@@ -92,13 +85,9 @@ void DealVideo::on_display_clicked()
 	{
 		std::string s = ui.comboBox->currentText().toStdString();
 		s = "video=" + s;
-		printf("%s\n", s);
-		readCap->setCapName(s);
-		readCap->start();
+
 		s = ui.audioList->currentText().toStdString();
 		s = "audio=" + s;
-		readAudio->setAudioName(s);
-		readAudio->start();
 	}
 }
 
@@ -118,7 +107,6 @@ void DealVideo::on_playVideo_clicked()
 			g_stopAudio = 0;
 			g_mutex.unlock();
 			ui.playVideo->setText("暂停");
-			readAV->start();
 		}
 	}
 }
@@ -133,14 +121,60 @@ void DealVideo::on_selectFile_clicked()
 		ui.playVideo->setText("播放");
 		std::string s = vedioPath.toStdString();
 		readAV->setFilePath(s);
-		g_mutex.lock();
+		if (readAV->isRunning()) {
+			g_mutex.lock();
 			g_isExitThread = true;
-			g_isStop = true;
-		g_mutex.unlock();
+			g_isStop = false;
+			g_mutex.unlock();
+		}
+		else 
+			readAV->start();
 	}
+}
+char *dup_wchar_to_utf8(wchar_t *w)
+{
+	char *s = NULL;
+	int l = WideCharToMultiByte(CP_UTF8, 0, w, -1, 0, 0, 0, 0);
+	s = (char *)av_malloc(l);
+	if (s)
+		WideCharToMultiByte(CP_UTF8, 0, w, -1, s, l, 0, 0);
+	return s;
+}
+void DealVideo::on_photo_clicked()
+{
+	std::string s = ui.comboBox->currentText().toStdString();
+	if (s != "") {
+		s = "video=" + s;
+		readDevices->m_InputStream.SetVideoCaptureDevice(s);//m_strVideoDevice
+		readDevices->start();
+	}
+}
+void DealVideo::on_recordVideo_click()
+{
 }
 void DealVideo::returnPlayFinish() {
 	ui.playVideo->setText("播放");
+}
+void DealVideo::GetTime(double time) {
+	m_s = (int)time % 60;
+	m_m = (int)time / 60;
+	QString str = QString("00:00/%1:%2").arg(m_m).arg(m_s);
+	ui.timeLabel->setText(str);
+	ui.horizontalSlider->setMaximum(int(time));
+}
+void DealVideo::show_image_1(QImage dstImage,double time)
+{
+	QImage img = dstImage;
+	float imageScale = 1.0f;
+	imageScale = fmin((float)ui.label->width() / (float)img.width(), (float)ui.label->height() / (float)img.height());
+	if (imageScale > 1)imageScale = 1;
+	img = img.scaled(img.width()*imageScale, img.height()*imageScale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	ui.label->setPixmap(QPixmap::fromImage(img)); // 在label上播放视频图片
+	int m = (int)time / 60;
+	int s = (int)time % 60;
+	ui.horizontalSlider->setValue((int)time);
+	QString str = QString("%1:%2/%3:%4").arg(m).arg(s).arg(m_m).arg(m_s);
+	ui.timeLabel->setText(str);
 }
 void DealVideo::show_image_1(QImage dstImage)
 {

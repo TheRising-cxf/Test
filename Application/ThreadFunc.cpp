@@ -19,6 +19,13 @@ int DecodeVideo(void *arg)
 
 	while (true)
 	{
+		g_mutex.lock();
+		if (g_isExitThread) {
+			g_mutex.unlock();
+			av_free_packet(&packet);
+			break;
+		}
+		g_mutex.unlock();
 		if (video->frameq.nb_frames >= FrameQueue::capacity)
 		{
 			SDL_Delay(500 * 2);
@@ -26,11 +33,6 @@ int DecodeVideo(void *arg)
 		}
 		bool flag = video->videoq.deQueue(&packet, false);
 		g_mutex.lock();
-		if (g_isExitThread) {
-			g_mutex.unlock();
-			av_free_packet(&packet);
-			break;
-		}
 		if (!flag && g_isFinish == 1) {
 			g_isFinish = 2;
 			g_mutex.unlock();
