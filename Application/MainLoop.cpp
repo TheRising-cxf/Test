@@ -86,7 +86,7 @@ int ReadDevices::OnStartStream(){
     AVSampleFormat  sample_fmt;
     if(m_InputStream.GetAudioInputInfo(sample_fmt, sample_rate, channels)) //获取音频采集源的信息
     {
-        m_OutputStream.SetAudioCodecProp(AV_CODEC_ID_AAC, sample_rate, channels, 32000); //设置音频编码器属性
+        m_OutputStream.SetAudioCodecProp(AV_CODEC_ID_AAC, 8000, channels, 32000); //设置音频编码器属性
     }
 
 	if (m_szFilePath == "") {
