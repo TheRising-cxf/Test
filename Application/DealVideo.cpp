@@ -34,8 +34,9 @@ DealVideo::DealVideo(QWidget *parent)
 	}
 	readAV = new ReadAV();
 	readDevices = new ReadDevices();
-	connect(readAV, SIGNAL(return_QImage(QImage,double)), this, SLOT(show_image_1(QImage,double)));
-	connect(readDevices, SIGNAL(return_QImage(QImage, double)), this, SLOT(show_image_1(QImage, double)));
+	connect(readAV, SIGNAL(return_QImage(QImage,double, bool)), this, SLOT(show_image_1(QImage,double,bool)));
+	connect(readDevices, SIGNAL(return_QImage(QImage, double,bool)), this, SLOT(show_image_1(QImage, double,bool)));
+	//connect(readDevices, SIGNAL(return_Finish()), this, SLOT(returnFinish()));
 	connect(readAV, SIGNAL(return_Finish()), this, SLOT(returnPlayFinish()));
 	connect(readAV, SIGNAL(return_videoTime(double)), this, SLOT(GetTime(double)));
 	g_stopAudio = 0;
@@ -142,15 +143,48 @@ char *dup_wchar_to_utf8(wchar_t *w)
 }
 void DealVideo::on_photo_clicked()
 {
-	std::string s = ui.comboBox->currentText().toStdString();
-	if (s != "") {
-		s = "video=" + s;
-		readDevices->m_InputStream.SetVideoCaptureDevice(s);//m_strVideoDevice
-		readDevices->start();
+	if (ui.photo->text() == "打开摄像头") {
+		std::string s = ui.comboBox->currentText().toStdString();
+		readDevices->SetPath("");
+		if (s != "") {
+			s = "video=" + s;
+			readDevices->m_InputStream.SetVideoCaptureDevice(s);//m_strVideoDevice
+			readDevices->start();
+			ui.photo->setText("关闭摄像头");
+		}
+	}
+	else if(ui.photo->text() == "关闭摄像头"){
+		ui.photo->setText("打开摄像头");
+		readDevices->OnCloseThread();
+		ui.recordVideo->setText("开始录制");
 	}
 }
-void DealVideo::on_recordVideo_click()
+void DealVideo::on_recordVideo_clicked()
 {
+	if (ui.recordVideo->text() == "开始录制") {
+		std::string sV = ui.comboBox->currentText().toStdString();
+		std::string sA= ui.audioList->currentText().toStdString();
+		if (sV != "") {
+			sV = "video=" + sV;
+			readDevices->m_InputStream.SetVideoCaptureDevice(sV);//m_strVideoDevice
+		}
+		if (sA != "") {
+			sA = "audio=" + sA;
+			readDevices->m_InputStream.SetAudioCaptureDevice(sA);
+		}
+		if (sA != ""||sV != "") {
+			time_t t = time(0);
+			char tmp[64];
+			strftime(tmp, sizeof(tmp), "%Y-%m-%d-%H_%M_%S.mp4", localtime(&t));
+			readDevices->SetPath(tmp);
+			readDevices->start();
+			ui.recordVideo->setText("结束录制");
+		}
+	}
+	else if(ui.recordVideo->text() == "结束录制"){
+		ui.recordVideo->setText("开始录制");
+		readDevices->OnCloseThread();
+	}
 }
 void DealVideo::returnPlayFinish() {
 	ui.playVideo->setText("播放");
@@ -162,13 +196,14 @@ void DealVideo::GetTime(double time) {
 	ui.timeLabel->setText(str);
 	ui.horizontalSlider->setMaximum(int(time));
 }
-void DealVideo::show_image_1(QImage dstImage,double time)
+void DealVideo::show_image_1(QImage dstImage,double time,bool isFilp = false)
 {
 	QImage img = dstImage;
 	float imageScale = 1.0f;
 	imageScale = fmin((float)ui.label->width() / (float)img.width(), (float)ui.label->height() / (float)img.height());
 	if (imageScale > 1)imageScale = 1;
 	img = img.scaled(img.width()*imageScale, img.height()*imageScale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+	img = img.mirrored(isFilp,false);
 	ui.label->setPixmap(QPixmap::fromImage(img)); // 在label上播放视频图片
 	int m = (int)time / 60;
 	int s = (int)time % 60;

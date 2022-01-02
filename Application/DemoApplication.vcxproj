@@ -21,6 +21,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -36,7 +37,7 @@
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>5.12.2_msvc2017_64</QtInstall>
+    <QtInstall>5.13.1_msvc2017_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -72,10 +73,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Qt\Qt5.12.2\5.12.2\msvc2017_64\include\QtCharts;C:\Qt\Qt5.12.2\5.12.2\msvc2017_64\include\QtMultimedia;..\opencv\include;..\opencv\include\opencv;..\opencv\include\opencv2;..\ffmpeg-4.4-full_build-shared\include;..\SDL2-2.0.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\QT\5.13.1\msvc2017_64\include\QtCharts;D:\QT\5.13.1\msvc2017_64\include\QtMultimedia;..\opencv\include;..\opencv\include\opencv;..\opencv\include\opencv2;..\ffmpeg-4.4-full_build-shared\include;..\SDL2-2.0.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\opencv\lib;..\ffmpeg-4.4-full_build-shared\lib\;..\SDL2-2.0.14\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\opencv\lib;..\ffmpeg-4.4-full_build-shared\lib\;..\SDL2-2.0.14\lib\x64;D:\QT\5.13.1\msvc2017_64\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Qt5Charts.lib;Qt5Multimedia.lib;opencv_world348.lib;..\ffmpeg-4.4-full_build-shared\lib\*.lib;SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>

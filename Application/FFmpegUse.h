@@ -28,7 +28,7 @@ public:
 	void setFilePath(string s);
 	void run();
 signals:
-	void return_QImage(QImage dstImage,double time);
+	void return_QImage(QImage dstImage,double time,bool isFlip);
 	void return_Finish();
 	void return_videoTime(double time);
 };

@@ -38,6 +38,8 @@ public:
 	//创建编码器和混合器，打开输出
 	bool  OpenOutputStream(const char* out_path);
 
+	int show_video_frame(AVStream * input_st,  enum AVPixelFormat pix_fmt, AVFrame *pframe, AVCodecContext* ctx);
+
 	//写入一帧图像
 	int  write_video_frame(AVStream *st, enum AVPixelFormat pix_fmt, AVFrame *pframe, int64_t lTimeStamp);
 
@@ -84,6 +86,7 @@ protected:
 
 	uint8_t ** m_converted_input_samples;
 	uint8_t * m_out_buffer;
+	uint8_t * m_show_buffer;
 
 public:
 	string     m_output_path; //输出路径

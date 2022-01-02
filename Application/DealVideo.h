@@ -43,9 +43,9 @@ private slots:
 	void on_playVideo_clicked();
 	void on_selectFile_clicked();
 	void on_photo_clicked();
-	void on_recordVideo_click();
+	void on_recordVideo_clicked();
 	void returnPlayFinish();
 	void GetTime(double time);
-	void show_image_1(QImage dstImage, double time);
+	void show_image_1(QImage dstImage, double time,bool isFilp);
 	void show_image_1(QImage dstImage);
 };

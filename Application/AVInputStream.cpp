@@ -5,12 +5,10 @@
 /* read a key without blocking */
 static int read_key(void)
 {
-	static int ch = -1;
 	if (_kbhit()) {//如果有按键按下，则_kbhit()函数返回真
-		ch = _getch();//使用_getch()函数获取按下的键值
-		cout << ch;
+		return 13;
 	}
-	return ch;
+	return 0;
 }
 CAVInputStream::CAVInputStream(void)
 {
@@ -249,9 +247,9 @@ void CAVInputStream::CloseInputStream()
         avformat_close_input(&m_pAudFmtCtx);  
     }  
 
-    if(m_pVidFmtCtx)
+    if(m_pVidFmtCtx!=NULL)
        avformat_free_context(m_pVidFmtCtx);
-    if(m_pAudFmtCtx)
+    if(m_pAudFmtCtx!=NULL)
        avformat_free_context(m_pAudFmtCtx);
 
     m_pVidFmtCtx = NULL;
@@ -284,17 +282,13 @@ int CAVInputStream::ReadVideoPackets()
     //start decode and encode
     while (encode_video)
     {
-        if (m_exit_thread)
-            break;
-
-        /* if 'Enter' pressed, exits */
-        //printf("read_key()=%d\n\n", read_key());
-        if (13 == read_key())
-        {
+		m_mutex.lock();
+		if (m_exit_thread)
+		{
+			m_mutex.unlock();
 			return 0;
-           // pthread_exit((void*)0);
-        }
-
+		}
+		m_mutex.unlock();
         AVFrame * pframe = NULL;
         if ((ret = av_read_frame(m_pVidFmtCtx, dec_pkt)) >= 0)
         {
@@ -364,42 +358,30 @@ int CAVInputStream::ReadAudioPackets()
 
     int encode_audio = 1;
     int dec_got_frame_a = 0;
-
+	AVPacket input_packet;
+	av_init_packet(&input_packet);
+	AVFrame *input_frame = av_frame_alloc();
+	if (!input_frame)
+	{
+		ret = AVERROR(ENOMEM);
+		return ret;
+	}
     //start decode and encode
     while (encode_audio)
     {
+		m_mutex.lock();
         if (m_exit_thread)
         {
-           break;
+			m_mutex.unlock();
+			break;
         }
-
-        /* if 'Enter' pressed, exits */
-        //printf("read_key()=%d\n\n", read_key());
-        if (13 == read_key())
-        {
-
-			return 0;
-           // pthread_exit((void*)0);
-        }
-
+		m_mutex.unlock();
         /**
         * Decode one frame worth of audio samples, convert it to the
         * output sample format and put it into the FIFO buffer.
-        */
-        AVFrame *input_frame = av_frame_alloc();
-        if (!input_frame)
-        {
-            ret = AVERROR(ENOMEM);
-            return ret;
-        }
-
+        *
         /** Decode one frame worth of audio samples. */
         /** Packet used for temporary storage. */
-        AVPacket input_packet;
-        av_init_packet(&input_packet);
-        input_packet.data = NULL;
-        input_packet.size = 0;
-
         /** Read one audio frame from the input file into a temporary packet. */
         if ((ret = av_read_frame(m_pAudFmtCtx, &input_packet)) < 0)
         {
@@ -410,7 +392,7 @@ int CAVInputStream::ReadAudioPackets()
             }
             else
             {
-                //printf("Could not read audio frame\n");
+                printf("Could not read audio frame\n");
 //                return ret;
                 //added by flq
                 continue;
@@ -424,21 +406,11 @@ int CAVInputStream::ReadAudioPackets()
             //printf("size=%d\n%s\n\n\n", strlen((char*)input_packet.data), input_packet.data);
 #endif
         }
-
-        /**
-        * Decode the audio frame stored in the temporary packet.
-        * The input audio stream decoder is used to do this.
-        * If we are at the end of the file, pass an empty packet to the decoder
-        * to flush it.
-        */
-#ifdef DEBUG
-        //printf("frame comes\n");
-#endif
 		int64_t dt = av_gettime() - m_start_time;
         if ((ret = avcodec_decode_audio4(m_pAudFmtCtx->streams[m_audioindex]->codec, input_frame, &dec_got_frame_a, &input_packet)) < 0)
         {
             printf("Could not decode audio frame\n");
-            return ret;
+            break;
         }
         av_packet_unref(&input_packet);
         /** If there is decoded data, convert and store it */
@@ -452,12 +424,9 @@ int CAVInputStream::ReadAudioPackets()
 				m_mutex.unlock();
             }
         }
-
-        av_frame_free(&input_frame);
-
-
+		av_frame_unref(input_frame);
     }//while
-
+	av_frame_free(&input_frame);
     return 0;
 }
 
@@ -494,7 +463,7 @@ bool  CAVInputStream::GetAudioInputInfo(AVSampleFormat & sample_fmt, int & sampl
 {
     if(m_audioindex != -1)
     {
-        int AStreamCnt = m_pVidFmtCtx->nb_streams;
+        int AStreamCnt = m_pAudFmtCtx->nb_streams;
         sample_fmt = m_pAudFmtCtx->streams[m_audioindex]->codec->sample_fmt;
         sample_rate = m_pAudFmtCtx->streams[m_audioindex]->codec->sample_rate;
         channels = m_pAudFmtCtx->streams[m_audioindex]->codec->channels;

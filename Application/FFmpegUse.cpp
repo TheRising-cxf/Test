@@ -31,7 +31,7 @@ bool video_refresh_timer(void *userdata)
 			double delay = current_pts - video->frame_last_pts;
 			if (delay <= 0 || delay >= 1.0)
 				delay = video->frame_last_delay;
-			printf("%f\n", video->frame_last_pts);
+			//printf("%f\n", video->frame_last_pts);
 			video->frame_last_delay = delay;
 			video->frame_last_pts = current_pts;
 
@@ -39,7 +39,7 @@ bool video_refresh_timer(void *userdata)
 			double ref_clock = media->audio->get_audio_clock();
 			double diff = current_pts - ref_clock;// diff < 0 => video slow,diff > 0 => video quick
 			double threshold = (delay < SYNC_THRESHOLD) ? delay : SYNC_THRESHOLD;
-			printf("%lf %lf %lf\n", ref_clock, current_pts, diff);
+			//printf("%lf %lf %lf\n", ref_clock, current_pts, diff);
 			if (fabs(diff) < NOSYNC_THRESHOLD) // 不同步
 			{
 				if (diff <= -threshold) // 慢了，delay设为0
@@ -158,7 +158,7 @@ void ReadAV::run()
 			g_mutex.unlock();
 			if (video_refresh_timer(&media)) {
 				QImage  Qimg((uchar*)media.video->displayFrame->data[0], media.video->video_ctx->width, media.video->video_ctx->height, QImage::Format_RGB32);
-				emit return_QImage(Qimg.copy(), media.video->frame_last_pts);
+				emit return_QImage(Qimg.copy(), media.video->frame_last_pts,false);
 				av_frame_unref(media.video->frame);
 				g_mutex.lock();
 				if (isFirst) {

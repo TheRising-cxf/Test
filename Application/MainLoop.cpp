@@ -20,16 +20,23 @@ void gettimeofday(struct timeval* tv) {
 //采集到的视频图像回调 CALLBACK
 int VideoCaptureCallback(AVStream * input_st, enum AVPixelFormat pix_fmt, AVFrame *pframe, int64_t lTimeStamp)
 {
-    gpMainFrame->m_OutputStream.write_video_frame(input_st, pix_fmt, pframe, lTimeStamp);
+	if (gpMainFrame->m_isSave) {
+		gpMainFrame->m_OutputStream.write_video_frame(input_st, pix_fmt, pframe, lTimeStamp);
+	}
+	else {
+		gpMainFrame->m_OutputStream.show_video_frame(input_st, pix_fmt, pframe, input_st->codec);
+	}
 	QImage  Qimg((uchar*)gpMainFrame->m_OutputStream.pFrameRGB->data[0] , pframe->width, pframe->height, QImage::Format_RGB32);
-	emit gpMainFrame->return_QImage(Qimg.copy(), 0.0);
+	emit gpMainFrame->return_QImage(Qimg.copy(), 0.0,true);
 	return 0;
 }
 
 //采集到的音频数据回调 CALLBACK
 int AudioCaptureCallback(AVStream * input_st, AVFrame *pframe, int64_t lTimeStamp)
 {
-    gpMainFrame->m_OutputStream.write_audio_frame(input_st, pframe, lTimeStamp);
+	if (gpMainFrame->m_isSave) {
+		gpMainFrame->m_OutputStream.write_audio_frame(input_st, pframe, lTimeStamp);
+	}
     return 0;
 }
 
@@ -82,13 +89,19 @@ int ReadDevices::OnStartStream(){
         m_OutputStream.SetAudioCodecProp(AV_CODEC_ID_AAC, sample_rate, channels, 32000); //设置音频编码器属性
     }
 
-
-    bRet  = m_OutputStream.OpenOutputStream(m_szFilePath); //设置输出路径
-    if(!bRet)
-    {
-        printf("初始化输出失败\n");
-        return 1;
-    }
+	if (m_szFilePath == "") {
+		m_isSave = false;
+		bRet = m_OutputStream.OpenOutputStream(""); //设置输出路径
+	}
+	else {
+		m_isSave = true;
+		bRet = m_OutputStream.OpenOutputStream(m_szFilePath.c_str()); //设置输出路径
+	}
+	if (!bRet)
+	{
+		printf("初始化输出失败\n");
+		return 1;
+	}
 
     //开始计时
     gettimeofday(&p_start);
@@ -113,13 +126,24 @@ int ReadDevices:: OnStopStream()
 
     return 0;
 }
+int ReadDevices::OnCloseThread()
+{
+	m_InputStream.m_mutex.lock();
+	m_InputStream.m_exit_thread = true;
+	m_InputStream.m_mutex.unlock();
+	return 0;
+}
+void ReadDevices::SetPath(string name)
+{
+	m_szFilePath = name;
+}
 void ReadDevices::run()
 {
 
 	gpMainFrame->OnStartStream();
 	//线程结束后执行
 	gpMainFrame->OnStopStream();
-
+	//emit return_Finish();
 	return ;
 }
 

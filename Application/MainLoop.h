@@ -32,16 +32,17 @@ public:
 
     int OnStartStream();
     int OnStopStream();
-
+	int OnCloseThread();
+	void SetPath(string name);
     void OnDestroy();
 	void run();
+	bool             m_isSave;
 protected:
     long              m_nChannelNum; //Í¨µÀºÅ
-
-    uint64_t              m_frmCount;
+    uint64_t         m_frmCount;
     int              m_nFPS;
-    bool              m_bPreview;
-    const char* m_szFilePath = "myout.flv";
+    bool             m_bPreview;
+    string           m_szFilePath;
 
     timeval p_start;
     timeval p_end;
@@ -50,7 +51,8 @@ public:
     CAVInputStream    m_InputStream;
     CAVOutputStream   m_OutputStream;
 signals:
-	void return_QImage(QImage dstImage, double time);
+	void return_QImage(QImage dstImage, double time,bool isFilp);
+	void return_Finish();
 
 };
 
